@@ -1,0 +1,119 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import Card from '@/components/ui/Card.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('posts', ({ data }) => {
+  return import.meta.env.PROD ? !data.draft : true;
+});
+
+// Sort by date (newest first)
+const sortedPosts = allPosts.sort((a, b) =>
+  b.data.pubDate.getTime() - a.data.pubDate.getTime()
+);
+
+// Get all unique tags
+const allTags = allPosts.flatMap(post => post.data.tags);
+const tagCounts = allTags.reduce((acc, tag) => {
+  acc[tag] = (acc[tag] || 0) + 1;
+  return acc;
+}, {} as Record<string, number>);
+const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
+
+// Get all unique languages
+const languages = [...new Set(allPosts.map(post => post.data.language).filter(Boolean))];
+
+// Pagination
+const postsPerPage = 10;
+const currentPage = 1;
+const totalPages = Math.ceil(sortedPosts.length / postsPerPage);
+const posts = sortedPosts.slice(0, postsPerPage);
+---
+
+<PageLayout title="Blog" description="All technical notes and articles">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="mb-12">
+      <h1 class="text-3xl sm:text-4xl font-bold text-notion-text dark:text-notion-text-dark mb-4">
+        All Notes
+      </h1>
+      <p class="text-lg text-notion-text dark:text-notion-text-dark/70">
+        {sortedPosts.length} note{sortedPosts.length !== 1 ? 's' : ''} on programming, algorithms, and software engineering
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8">
+      <!-- Posts Grid -->
+      <div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {posts.map(post => (
+            <Card post={post} />
+          ))}
+        </div>
+
+        <!-- Pagination -->
+        {totalPages > 1 && (
+          <div class="mt-12 flex items-center justify-center gap-2">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <a
+                href={page === 1 ? '/blog' : `/blog/page/${page}`}
+                class={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  page === currentPage
+                    ? 'bg-notion-blue text-white'
+                    : 'bg-notion-gray dark:bg-notion-gray-dark text-notion-text dark:text-notion-text-dark hover:bg-notion-border dark:hover:bg-notion-border-dark'
+                }`}
+              >
+                {page}
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="space-y-8">
+        {/* Languages */}
+        {languages.length > 0 && (
+          <div class="bg-notion-gray dark:bg-notion-gray-dark/50 rounded-lg p-6">
+            <h2 class="text-lg font-semibold text-notion-text dark:text-notion-text-dark mb-4">
+              Languages
+            </h2>
+            <div class="space-y-2">
+              {languages.map(language => (
+                <a
+                  href={`/languages/${language?.toLowerCase().replace(/\s+/g, '-')}`}
+                  class="flex items-center justify-between py-2 text-sm text-notion-text dark:text-notion-text-dark/70 hover:text-notion-blue transition-colors"
+                >
+                  <span>{language}</span>
+                  <span class="text-notion-text dark:text-notion-text-dark/50">
+                    {allPosts.filter(p => p.data.language === language).length}
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tags */}
+        {sortedTags.length > 0 && (
+          <div class="bg-notion-gray dark:bg-notion-gray-dark/50 rounded-lg p-6">
+            <h2 class="text-lg font-semibold text-notion-text dark:text-notion-text-dark mb-4">
+              Tags
+            </h2>
+            <div class="flex flex-wrap gap-2">
+              {sortedTags.map(([tag, count]) => (
+                <a
+                  href={`/tags/${tag.toLowerCase().replace(/\s+/g, '-')}`}
+                  class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-notion-bg dark:bg-notion-bg-dark text-notion-text dark:text-notion-text-dark hover:bg-notion-border dark:hover:bg-notion-border-dark transition-colors"
+                >
+                  #{tag}
+                  <span class="text-notion-text dark:text-notion-text-dark/50">({count})</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+      </aside>
+    </div>
+  </div>
+</PageLayout>

@@ -1,0 +1,259 @@
+---
+title: 'CUDA Kernel Basics'
+description: 'Getting started with CUDA: writing your first GPU kernels and understanding the execution model'
+pubDate: 2024-02-28
+tags: ['cuda', 'gpu', 'parallel-computing', 'cpp']
+language: 'CUDA'
+---
+
+import Callout from '@/components/ui/Callout.astro';
+
+## Introduction
+
+CUDA (Compute Unified Device Architecture) enables developers to use NVIDIA GPUs for general-purpose computing. This post covers the fundamentals of writing CUDA kernels.
+
+## The GPU Execution Model
+
+Understanding how CUDA organizes work is crucial:
+
+| Concept | Description |
+|---------|-------------|
+| **Kernel** | Function that runs on the GPU |
+| **Grid** | Collection of all blocks for a kernel launch |
+| **Block** | Group of threads that can cooperate |
+| **Thread** | Individual execution unit |
+| **Warp** | Group of 32 threads executed in lockstep |
+
+<Callout type="note">
+  Threads within a block can synchronize and share memory. Blocks are independent and can execute in any order.
+</Callout>
+
+## Your First Kernel
+
+```cpp
+#include <cuda_runtime.h>
+#include <stdio.h>
+
+// Kernel: runs on GPU
+__global__ void helloCUDA() {
+    int threadId = threadIdx.x;
+    int blockId = blockIdx.x;
+
+    printf("Hello from thread %d in block %d\\n", threadId, blockId);
+}
+
+int main() {
+    // Launch kernel with 2 blocks, 4 threads each
+    helloCUDA<<<2, 4>>>();
+
+    // Wait for GPU to finish
+    cudaDeviceSynchronize();
+
+    return 0;
+}
+```
+
+Compile and run:
+```bash
+nvcc hello.cu -o hello
+./hello
+```
+
+## Vector Addition Example
+
+```cpp
+__global__ void vectorAdd(const float* A, const float* B, float* C, int n) {
+    // Calculate global thread ID
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+
+    // Guard for out-of-bounds
+    if (i < n) {
+        C[i] = A[i] + B[i];
+    }
+}
+
+void launchVectorAdd(const float* h_A, const float* h_B, float* h_C, int n) {
+    float *d_A, *d_B, *d_C;
+    size_t size = n * sizeof(float);
+
+    // Allocate device memory
+    cudaMalloc(&d_A, size);
+    cudaMalloc(&d_B, size);
+    cudaMalloc(&d_C, size);
+
+    // Copy data to device
+    cudaMemcpy(d_A, h_A, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, h_B, size, cudaMemcpyHostToDevice);
+
+    // Launch kernel
+    int threadsPerBlock = 256;
+    int blocksPerGrid = (n + threadsPerBlock - 1) / threadsPerBlock;
+
+    vectorAdd<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, n);
+
+    // Copy result back
+    cudaMemcpy(h_C, d_C, size, cudaMemcpyDeviceToHost);
+
+    // Free device memory
+    cudaFree(d_A);
+    cudaFree(d_B);
+    cudaFree(d_C);
+}
+```
+
+## Memory Hierarchy
+
+```cpp
+__global__ void memoryExample(float* globalData) {
+    // Global memory: accessible by all threads
+    float globalVal = globalData[threadIdx.x];
+
+    // Shared memory: fast, shared within block
+    __shared__ float sharedData[256];
+    sharedData[threadIdx.x] = globalVal;
+    __syncthreads();  // Synchronize threads in block
+
+    // Registers: fastest, private to each thread
+    float reg = sharedData[threadIdx.x];
+
+    // Local memory: spilled registers (slow)
+    float localArray[100];  // Large arrays go here
+
+    // Constant memory: read-only, cached
+    __constant__ float constData[256];  // Defined at file scope
+}
+```
+
+| Memory | Scope | Lifetime | Speed |
+|--------|-------|----------|-------|
+| Register | Thread | Kernel | Fastest |
+| Shared | Block | Kernel | Very Fast |
+| L1/L2 Cache | All threads | Variable | Fast |
+| Global | All threads | Application | Slow |
+| Constant | All threads | Application | Fast (cached) |
+| Texture | All threads | Application | Fast (cached) |
+
+## 2D Grid for Image Processing
+
+```cpp
+__global__ void blurKernel(const uchar4* input, uchar4* output,
+                           int width, int height) {
+    // 2D thread indices
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if (x >= width || y >= height) return;
+
+    int idx = y * width + x;
+
+    // Simple box blur (3x3)
+    float4 sum = make_float4(0, 0, 0, 0);
+    int count = 0;
+
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dx = -1; dx <= 1; dx++) {
+            int nx = x + dx;
+            int ny = y + dy;
+
+            if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                uchar4 pixel = input[ny * width + nx];
+                sum.x += pixel.x;
+                sum.y += pixel.y;
+                sum.z += pixel.z;
+                count++;
+            }
+        }
+    }
+
+    output[idx] = make_uchar4(
+        sum.x / count,
+        sum.y / count,
+        sum.z / count,
+        input[idx].w
+    );
+}
+
+// Launch configuration
+dim3 threadsPerBlock(16, 16);
+dim3 numBlocks((width + 15) / 16, (height + 15) / 16);
+blurKernel<<<numBlocks, threadsPerBlock>>>(d_input, d_output, width, height);
+```
+
+## Unified Memory
+
+Simplified memory management with automatic migration:
+
+```cpp
+__managed__ float data[1000000];  // Accessible from CPU and GPU
+
+void unifiedMemoryExample() {
+    // Initialize on CPU
+    for (int i = 0; i < 1000000; i++) {
+        data[i] = i;
+    }
+
+    // Use directly on GPU
+    kernel<<<blocks, threads>>>(data);
+    cudaDeviceSynchronize();
+
+    // Access results on CPU
+    printf("Result: %f\\n", data[500]);
+}
+```
+
+<Callout type="tip">
+  Unified Memory simplifies code but may have performance overhead. Use explicit transfers for optimal performance.
+</Callout>
+
+## Error Handling
+
+```cpp
+#define cudaCheckError(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+
+inline void gpuAssert(cudaError_t code, const char* file, int line) {
+    if (code != cudaSuccess) {
+        fprintf(stderr, "GPUassert: %s %s %d\\n",
+                cudaGetErrorString(code), file, line);
+        exit(code);
+    }
+}
+
+// Usage
+cudaCheckError(cudaMalloc(&d_data, size));
+cudaCheckError(cudaMemcpy(d_data, h_data, size, cudaMemcpyHostToDevice));
+kernel<<<blocks, threads>>>(d_data);
+cudaCheckError(cudaGetLastError());  // Check kernel launch
+cudaCheckError(cudaDeviceSynchronize());  // Check execution
+```
+
+## Profiling with Nsight
+
+```bash
+# Command line profiler
+nv-nsight-cu-cli ./myprogram
+
+# Visual profiler
+nv-nsight-cu ./myprogram
+
+# Nsight Systems for timeline analysis
+nsys profile -o report ./myprogram
+```
+
+Key metrics to watch:
+- **Occupancy**: How well are SMs utilized?
+- **Memory throughput**: Are you memory-bound?
+- **Branch divergence**: Are warps executing efficiently?
+
+## Optimization Checklist
+
+<Callout type="note">
+  1. **Coalesce memory accesses**: Ensure threads access consecutive memory
+  2. **Minimize host-device transfers**: Batch operations
+  3. **Use shared memory**: For data reuse within blocks
+  4. **Avoid branch divergence**: Keep threads in a warp on same path
+  5. **Launch enough blocks**: Hide memory latency with occupancy
+</Callout>
+
+## Conclusion
+
+CUDA programming requires understanding the GPU's parallel architecture. Start with simple kernels, profile your code, and optimize based on data. The performance gains are worth the learning curve!

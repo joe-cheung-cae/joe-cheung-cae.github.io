@@ -1,0 +1,89 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('posts', ({ data }) => {
+  return import.meta.env.PROD ? !data.draft : true;
+});
+
+// Get all unique tags with counts
+const allTags = allPosts.flatMap(post => post.data.tags);
+const tagCounts = allTags.reduce((acc, tag) => {
+  acc[tag] = (acc[tag] || 0) + 1;
+  return acc;
+}, {} as Record<string, number>);
+
+// Sort by count (descending), then alphabetically
+const sortedTags = Object.entries(tagCounts).sort((a, b) => {
+  if (b[1] !== a[1]) return b[1] - a[1];
+  return a[0].localeCompare(b[0]);
+});
+
+// Group by first letter
+const groupedTags = sortedTags.reduce((acc, [tag, count]) => {
+  const firstLetter = tag[0].toUpperCase();
+  if (!acc[firstLetter]) {
+    acc[firstLetter] = [];
+  }
+  acc[firstLetter].push({ tag, count });
+  return acc;
+}, {} as Record<string, { tag: string; count: number }[]>);
+
+const letters = Object.keys(groupedTags).sort();
+---
+
+<PageLayout title="Tags" description="Browse all tags">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="mb-12">
+      <h1 class="text-3xl sm:text-4xl font-bold text-notion-text dark:text-notion-text-dark mb-4">
+        Tags
+      </h1>
+      <p class="text-lg text-notion-text dark:text-notion-text-dark/70">
+        {sortedTags.length} tags across {allPosts.length} notes
+      </p>
+    </div>
+
+    <!-- Tag Cloud -->
+    <div class="mb-12">
+      <div class="flex flex-wrap gap-3">
+        {sortedTags.map(([tag, count]) => (
+          <a
+            href={`/tags/${tag.toLowerCase().replace(/\s+/g, '-')}`}
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-notion-gray dark:bg-notion-gray-dark text-notion-text dark:text-notion-text-dark hover:bg-notion-border dark:hover:bg-notion-border-dark transition-colors"
+            style={`font-size: ${Math.max(0.875, Math.min(1.25, 0.875 + count * 0.05))}rem`}
+          >
+            #{tag}
+            <span class="text-sm text-notion-text dark:text-notion-text-dark/50">({count})</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <!-- Grouped List -->
+    <div class="space-y-8">
+      {letters.map(letter => (
+        <div id={letter.toLowerCase()}>
+          <h2 class="text-2xl font-bold text-notion-text dark:text-notion-text-dark mb-4">
+            {letter}
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {groupedTags[letter].map(({ tag, count }) => (
+              <a
+                href={`/tags/${tag.toLowerCase().replace(/\s+/g, '-')}`}
+                class="flex items-center justify-between p-4 rounded-lg bg-notion-gray dark:bg-notion-gray-dark/50 hover:bg-notion-border dark:hover:bg-notion-border-dark transition-colors"
+              >
+                <span class="font-medium text-notion-text dark:text-notion-text-dark">
+                  #{tag}
+                </span>
+                <span class="text-sm text-notion-text dark:text-notion-text-dark/50">
+                  {count} {count === 1 ? 'post' : 'posts'}
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</PageLayout>

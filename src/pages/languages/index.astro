@@ -1,0 +1,82 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('posts', ({ data }) => {
+  return import.meta.env.PROD ? !data.draft : true;
+});
+
+// Get all unique languages with counts
+const languageCounts = allPosts.reduce((acc, post) => {
+  const lang = post.data.language;
+  if (lang) {
+    acc[lang] = (acc[lang] || 0) + 1;
+  }
+  return acc;
+}, {} as Record<string, number>);
+
+const sortedLanguages = Object.entries(languageCounts).sort((a, b) => b[1] - a[1]);
+---
+
+<PageLayout title="Languages" description="Browse notes by programming language">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="mb-12">
+      <h1 class="text-3xl sm:text-4xl font-bold text-notion-text dark:text-notion-text-dark mb-4">
+        Languages
+      </h1>
+      <p class="text-lg text-notion-text dark:text-notion-text-dark/70">
+        Notes organized by programming language or technology
+      </p>
+    </div>
+
+    <!-- Language Cards -->
+    {sortedLanguages.length > 0 ? (
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {sortedLanguages.map(([language, count]) => {
+          const posts = allPosts.filter(p => p.data.language === language);
+          const tags = [...new Set(posts.flatMap(p => p.data.tags))].slice(0, 5);
+
+          return (
+            <a
+              href={`/languages/${language.toLowerCase().replace(/\s+/g, '-')}`}
+              class="group block p-6 rounded-xl border border-notion-border dark:border-notion-border-dark bg-notion-bg dark:bg-notion-bg-dark hover:border-notion-blue dark:hover:border-notion-blue transition-all duration-200"
+            >
+              <div class="flex items-start justify-between mb-4">
+                <h2 class="text-xl font-semibold text-notion-text dark:text-notion-text-dark group-hover:text-notion-blue transition-colors">
+                  {language}
+                </h2>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-notion-blue-light dark:bg-blue-900/30 text-notion-blue">
+                  {count} {count === 1 ? 'note' : 'notes'}
+                </span>
+              </div>
+
+              {tags.length > 0 && (
+                <div class="flex flex-wrap gap-2">
+                  {tags.map(tag => (
+                    <span class="inline-flex items-center px-2 py-1 rounded text-xs bg-notion-gray dark:bg-notion-gray-dark text-notion-text dark:text-notion-text-dark/70">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <div class="mt-4 flex items-center text-sm text-notion-blue font-medium">
+                View all
+                <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    ) : (
+      <div class="text-center py-16">
+        <p class="text-notion-text dark:text-notion-text-dark/60">
+          No languages found.
+        </p>
+      </div>
+    )}
+  </div>
+</PageLayout>

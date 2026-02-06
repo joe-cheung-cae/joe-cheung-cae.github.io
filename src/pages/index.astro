@@ -1,0 +1,161 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import Card from '@/components/ui/Card.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('posts', ({ data }) => {
+  return import.meta.env.PROD ? !data.draft : true;
+});
+
+// Sort by date (newest first)
+const sortedPosts = allPosts.sort((a, b) =>
+  b.data.pubDate.getTime() - a.data.pubDate.getTime()
+);
+
+// Get featured posts
+const featuredPosts = sortedPosts.filter(post => post.data.featured).slice(0, 2);
+
+// Get latest posts (excluding featured)
+const latestPosts = sortedPosts.filter(post => !post.data.featured).slice(0, 6);
+
+// Get all unique languages
+const languages = [...new Set(allPosts.map(post => post.data.language).filter(Boolean))];
+
+// Get all unique tags
+const allTags = allPosts.flatMap(post => post.data.tags);
+const tagCounts = allTags.reduce((acc, tag) => {
+  acc[tag] = (acc[tag] || 0) + 1;
+  return acc;
+}, {} as Record<string, number>);
+const topTags = Object.entries(tagCounts)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 8)
+  .map(([tag]) => tag);
+---
+
+<PageLayout>
+  <!-- Hero Section -->
+  <section class="py-16 sm:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-notion-text dark:text-notion-text-dark mb-6">
+          Technical Notes for
+          <span class="text-notion-blue"> Developers</span>
+        </h1>
+        <p class="text-lg sm:text-xl text-notion-text dark:text-notion-text-dark/70 mb-8">
+          A collection of in-depth notes on algorithms, C++, CMake, CUDA, and software engineering.
+          Built for quick reference and deep learning.
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a
+            href="/blog"
+            class="inline-flex items-center px-6 py-3 rounded-lg bg-notion-blue text-white font-medium hover:bg-notion-blue/90 transition-colors"
+          >
+            Browse All Notes
+            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+            </svg>
+          </a>
+          <a
+            href="/about"
+            class="inline-flex items-center px-6 py-3 rounded-lg border border-notion-border dark:border-notion-border-dark text-notion-text dark:text-notion-text-dark font-medium hover:bg-notion-gray dark:hover:bg-notion-gray-dark transition-colors"
+          >
+            About This Site
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Start Here Section -->
+  {featuredPosts.length > 0 && (
+    <section class="py-12 bg-notion-gray dark:bg-notion-gray-dark/30">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h2 class="text-2xl font-bold text-notion-text dark:text-notion-text-dark">Start Here</h2>
+            <p class="text-notion-text dark:text-notion-text-dark/60 mt-1">Featured notes to get you started</p>
+          </div>
+          <a
+            href="/blog"
+            class="hidden sm:inline-flex items-center text-sm font-medium text-notion-blue hover:underline"
+          >
+            View all
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {featuredPosts.map(post => (
+            <Card post={post} featured />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Latest Notes Section -->
+  <section class="py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h2 class="text-2xl font-bold text-notion-text dark:text-notion-text-dark">Latest Notes</h2>
+          <p class="text-notion-text dark:text-notion-text-dark/60 mt-1">Recently added to the collection</p>
+        </div>
+        <a
+          href="/blog"
+          class="hidden sm:inline-flex items-center text-sm font-medium text-notion-blue hover:underline"
+        >
+          View all
+          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </a>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {latestPosts.map(post => (
+          <Card post={post} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Browse by Language -->
+  {languages.length > 0 && (
+    <section class="py-12 bg-notion-gray dark:bg-notion-gray-dark/30">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-bold text-notion-text dark:text-notion-text-dark mb-6">Browse by Language</h2>
+        <div class="flex flex-wrap gap-3">
+          {languages.map(language => (
+            <a
+              href={`/languages/${language?.toLowerCase().replace(/\s+/g, '-')}`}
+              class="inline-flex items-center px-4 py-2 rounded-lg bg-notion-bg dark:bg-notion-bg-dark border border-notion-border dark:border-notion-border-dark text-notion-text dark:text-notion-text-dark hover:border-notion-blue dark:hover:border-notion-blue transition-colors"
+            >
+              {language}
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Popular Tags -->
+  {topTags.length > 0 && (
+    <section class="py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-bold text-notion-text dark:text-notion-text-dark mb-6">Popular Tags</h2>
+        <div class="flex flex-wrap gap-3">
+          {topTags.map(tag => (
+            <a
+              href={`/tags/${tag.toLowerCase().replace(/\s+/g, '-')}`}
+              class="inline-flex items-center px-4 py-2 rounded-full bg-notion-gray dark:bg-notion-gray-dark text-notion-text dark:text-notion-text-dark hover:bg-notion-border dark:hover:bg-notion-border-dark transition-colors"
+            >
+              #{tag}
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+</PageLayout>

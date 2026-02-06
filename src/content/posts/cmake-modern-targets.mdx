@@ -1,0 +1,238 @@
+---
+title: 'Modern CMake: Target-Based Approach'
+description: 'Moving away from global variables to modern target-based CMake for better build systems'
+pubDate: 2024-02-01
+tags: ['cmake', 'build-systems', 'cpp', 'best-practices']
+language: 'CMake'
+---
+
+import Callout from '@/components/ui/Callout.astro';
+
+## The Old Way (Don't Do This)
+
+Traditional CMake relied on global variables:
+
+```cmake
+# OLD AND BROKEN
+include_directories(${CMAKE_SOURCE_DIR}/include)
+link_directories(/usr/local/lib)
+add_definitions(-DENABLE_FEATURE)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+
+add_executable(myapp main.cpp)
+target_link_libraries(myapp libfoo)
+```
+
+Problems with this approach:
+- **Global pollution**: Settings affect all targets
+- **Transitive dependencies**: Not handled automatically
+- **Poor encapsulation**: Implementation details leak
+
+<Callout type="danger">
+  Avoid global CMake commands like `include_directories`, `link_directories`, and `add_definitions`. They create brittle, hard-to-maintain build systems.
+</Callout>
+
+## Modern Target-Based CMake
+
+Modern CMake (3.0+) treats targets as objects with properties:
+
+```cmake
+cmake_minimum_required(VERSION 3.15)
+project(MyProject CXX)
+
+# Create library target
+add_library(math STATIC
+    src/vector.cpp
+    src/matrix.cpp
+)
+
+# Target properties
+target_include_directories(math
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}/src
+)
+
+target_compile_features(math PUBLIC cxx_std_17)
+
+target_compile_options(math PRIVATE
+    $<$<CXX_COMPILER_ID:MSVC>:/W4>
+    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>
+)
+
+# Create executable
+add_executable(calculator apps/calc.cpp)
+
+target_link_libraries(calculator PRIVATE math)
+```
+
+## Understanding Visibility
+
+| Visibility | Meaning | Use Case |
+|-----------|---------|----------|
+| `PRIVATE` | Used only by this target | Implementation details |
+| `INTERFACE` | Used only by dependents | Header-only libraries |
+| `PUBLIC` | Used by both | Part of API |
+
+```cmake
+add_library(networking STATIC
+    src/socket.cpp
+    src/http.cpp
+)
+
+# OpenSSL is implementation detail
+target_link_libraries(networking PRIVATE OpenSSL::SSL)
+
+# Boost.Asio is in our public headers
+target_link_libraries(networking PUBLIC Boost::asio)
+
+# Testing library only for tests
+target_link_libraries(networking INTERFACE Catch2::Catch2)
+```
+
+## Generator Expressions
+
+Powerful conditional logic at generate time:
+
+```cmake
+target_compile_definitions(mylib PRIVATE
+    # Platform detection
+    $<$<PLATFORM_ID:Windows>:WIN32_LEAN_AND_MEAN>
+    $<$<PLATFORM_ID:Linux>:LINUX_BUILD>
+
+    # Configuration-based
+    $<$<CONFIG:Debug>:DEBUG_BUILD>
+    $<$<CONFIG:Release>:NDEBUG>
+
+    # Compiler-specific
+    $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
+)
+```
+
+<Callout type="tip">
+  Generator expressions are evaluated at build system generation time, making your build portable across platforms and configurations.
+</Callout>
+
+## Creating Exportable Libraries
+
+```cmake
+add_library(mylib SHARED src/mylib.cpp)
+
+# Proper include directory setup
+target_include_directories(mylib
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+
+# Export targets
+install(TARGETS mylib
+    EXPORT MyLibTargets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
+)
+
+install(EXPORT MyLibTargets
+    FILE MyLibTargets.cmake
+    NAMESPACE MyLib::
+    DESTINATION lib/cmake/MyLib
+)
+
+# Create package config file
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/MyLibConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/MyLibConfig.cmake
+    INSTALL_DESTINATION lib/cmake/MyLib
+)
+```
+
+## FetchContent for Dependencies
+
+Modern dependency management without external tools:
+
+```cmake
+include(FetchContent)
+
+# Declare dependencies
+FetchContent_Declare(
+    fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+    GIT_TAG 10.1.1
+)
+
+FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG v1.14.0
+)
+
+# Make available
+FetchContent_MakeAvailable(fmt googletest)
+
+# Use in your targets
+target_link_libraries(myapp PRIVATE fmt::fmt)
+target_link_libraries(mytests PRIVATE GTest::gtest_main)
+```
+
+## Presets for Consistent Builds
+
+`CMakePresets.json` for reproducible builds:
+
+```json
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "default",
+      "hidden": true,
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_CXX_STANDARD": "20",
+        "CMAKE_CXX_STANDARD_REQUIRED": "ON"
+      }
+    },
+    {
+      "name": "debug",
+      "inherits": "default",
+      "binaryDir": "build/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "ENABLE_SANITIZERS": "ON"
+      }
+    },
+    {
+      "name": "release",
+      "inherits": "default",
+      "binaryDir": "build/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "ENABLE_LTO": "ON"
+      }
+    }
+  ]
+}
+```
+
+Usage:
+```bash
+cmake --preset debug
+cmake --build build/debug
+```
+
+## Best Practices Summary
+
+<Callout type="note">
+  1. **Minimum version**: Require CMake 3.15+ for modern features
+  2. **Target everything**: Use targets instead of variables
+  3. **Proper visibility**: Think about PUBLIC vs PRIVATE
+  4. **Use presets**: Ensure consistent build configurations
+  5. **Package management**: Prefer FetchContent or Conan/vcpkg
+</Callout>
+
+Modern CMake transforms your build system from a collection of scripts into a maintainable, declarative specification.

@@ -1,0 +1,48 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+---
+
+<PageLayout title="404 - Page Not Found" description="The page you're looking for doesn't exist" noIndex>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+    <div class="text-center max-w-2xl mx-auto">
+      <h1 class="text-6xl sm:text-8xl font-bold text-notion-blue mb-4">404</h1>
+      <h2 class="text-2xl sm:text-3xl font-semibold text-notion-text dark:text-notion-text-dark mb-4">
+        Page Not Found
+      </h2>
+      <p class="text-lg text-notion-text dark:text-notion-text-dark/70 mb-8">
+        The page you're looking for doesn't exist or has been moved.
+      </p>
+
+      <div class="flex flex-wrap justify-center gap-4">
+        <a
+          href="/"
+          class="inline-flex items-center px-6 py-3 rounded-lg bg-notion-blue text-white font-medium hover:bg-notion-blue/90 transition-colors"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+          Go Home
+        </a>
+        <a
+          href="/blog"
+          class="inline-flex items-center px-6 py-3 rounded-lg border border-notion-border dark:border-notion-border-dark text-notion-text dark:text-notion-text-dark font-medium hover:bg-notion-gray dark:hover:bg-notion-gray-dark transition-colors"
+        >
+          Browse Notes
+        </a>
+      </div>
+
+      {/* Suggested Links */}
+      <div class="mt-16 pt-8 border-t border-notion-border dark:border-notion-border-dark">
+        <h3 class="text-sm font-semibold text-notion-text dark:text-notion-text-dark/60 uppercase tracking-wider mb-4">
+          Popular Destinations
+        </h3>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a href="/tags/cpp" class="text-notion-blue hover:underline">#cpp</a>
+          <a href="/tags/algorithms" class="text-notion-blue hover:underline">#algorithms</a>
+          <a href="/languages/c++" class="text-notion-blue hover:underline">C++</a>
+          <a href="/about" class="text-notion-blue hover:underline">About</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</PageLayout>

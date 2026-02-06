@@ -1,0 +1,66 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import { siteConfig } from '@/site.config';
+---
+
+<PageLayout title="About" description="About this technical notes blog">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <h1 class="text-3xl sm:text-4xl font-bold text-notion-text dark:text-notion-text-dark mb-8">
+      About
+    </h1>
+
+    <div class="prose-custom">
+      <p class="text-lg text-notion-text dark:text-notion-text-dark/80 mb-6">
+        Welcome to {siteConfig.title} — a personal knowledge base for technical notes on programming,
+        algorithms, and software engineering.
+      </p>
+
+      <h2>Why This Exists</h2>
+      <p>
+        I created this site to solve a problem: I was learning a lot but couldn't easily find
+        my notes when I needed them. Traditional note-taking apps were either too slow or
+        didn't support the technical content I wanted to capture.
+      </p>
+      <p>
+        This blog is built with a few key principles:
+      </p>
+      <ul>
+        <li><strong>Fast search</strong> — Find any note in seconds</li>
+        <li><strong>Tag-based organization</strong> — Browse by topic or language</li>
+        <li><strong>Code-friendly</strong> — Syntax highlighting for all major languages</li>
+        <li><strong>Dark mode</strong> — Easy on the eyes during late-night coding</li>
+      </ul>
+
+      <h2>Topics Covered</h2>
+      <ul>
+        <li><strong>C++</strong> — Modern C++ features, performance optimization, memory management</li>
+        <li><strong>Algorithms</strong> — Computational geometry, graph algorithms, data structures</li>
+        <li><strong>Build Systems</strong> — CMake, build optimization, CI/CD</li>
+        <li><strong>GPU Computing</strong> — CUDA, parallel algorithms, performance tuning</li>
+        <li><strong>Best Practices</strong> — Software design, testing, productivity</li>
+      </ul>
+
+      <h2>Tech Stack</h2>
+      <p>
+        This site is built with modern web technologies:
+      </p>
+      <ul>
+        <li><a href="https://astro.build">Astro</a> — Static site generator</li>
+        <li><a href="https://tailwindcss.com">Tailwind CSS</a> — Styling</li>
+        <li><a href="https://mdxjs.com">MDX</a> — Markdown with components</li>
+        <li><a href="https://lucaong.github.io/minisearch/">MiniSearch</a> — Client-side search</li>
+        <li><a href="https://preactjs.com">Preact</a> — Interactive islands</li>
+      </ul>
+
+      <h2>Get in Touch</h2>
+      <p>
+        Have a question or suggestion? Reach out via:
+      </p>
+      <ul>
+        <li>GitHub: <a href={siteConfig.social.github} target="_blank" rel="noopener noreferrer">{siteConfig.social.github}</a></li>
+        <li>Twitter: <a href={siteConfig.social.twitter} target="_blank" rel="noopener noreferrer">{siteConfig.social.twitter}</a></li>
+        <li>Email: <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a></li>
+      </ul>
+    </div>
+  </div>
+</PageLayout>

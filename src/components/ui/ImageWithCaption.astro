@@ -1,0 +1,30 @@
+---
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+  width?: number;
+  height?: number;
+}
+
+const { src, alt, caption, width, height } = Astro.props;
+---
+
+<figure class="my-6">
+  <img
+    src={src}
+    alt={alt}
+    width={width}
+    height={height}
+    class="w-full rounded-lg"
+    loading="lazy"
+    decoding="async"
+  />
+  {caption && (
+    <figcaption class="mt-2 text-center text-sm text-notion-text dark:text-notion-text-dark/60">
+      {caption}
+    </figcaption>
+  )}
+</figure>

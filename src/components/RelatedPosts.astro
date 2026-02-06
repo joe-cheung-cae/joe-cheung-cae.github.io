@@ -1,0 +1,23 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Card from './ui/Card.astro';
+
+interface Props {
+  posts: CollectionEntry<'posts'>[];
+}
+
+const { posts } = Astro.props;
+---
+
+{posts.length > 0 && (
+  <section class="mt-12 pt-8 border-t border-notion-border dark:border-notion-border-dark">
+    <h2 class="text-xl font-semibold text-notion-text dark:text-notion-text-dark mb-6">
+      Related Posts
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {posts.map((post) => (
+        <Card post={post} />
+      ))}
+    </div>
+  </section>
+)}

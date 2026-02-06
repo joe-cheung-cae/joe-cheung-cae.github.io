@@ -1,0 +1,20 @@
+---
+interface Props {
+  tag: string;
+  size?: 'sm' | 'md';
+}
+
+const { tag, size = 'md' } = Astro.props;
+
+const sizeClasses = {
+  sm: 'px-2 py-0.5 text-xs',
+  md: 'px-3 py-1 text-sm',
+};
+---
+
+<a
+  href={`/tags/${tag.toLowerCase().replace(/\s+/g, '-')}`}
+  class={`inline-flex items-center rounded-full font-medium bg-notion-gray dark:bg-notion-gray-dark text-notion-text dark:text-notion-text-dark hover:bg-notion-border dark:hover:bg-notion-border-dark transition-colors ${sizeClasses[size]}`}
+>
+  #{tag}
+</a>

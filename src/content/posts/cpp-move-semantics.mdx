@@ -1,0 +1,196 @@
+---
+title: 'Understanding C++ Move Semantics'
+description: 'Deep dive into move semantics, rvalue references, and perfect forwarding in modern C++'
+pubDate: 2024-01-22
+tags: ['cpp', 'performance', 'move-semantics', 'rvalue-references']
+language: 'C++'
+featured: true
+---
+
+import Callout from '@/components/ui/Callout.astro';
+
+## The Problem: Unnecessary Copies
+
+Before C++11, passing objects by value always meant copying:
+
+```cpp
+std::vector<int> createLargeVector() {
+    std::vector<int> v(1000000);
+    // Fill vector...
+    return v;  // Copy! (before NRVO)
+}
+
+std::vector<int> v = createLargeVector();  // Another copy!
+```
+
+## Rvalue References
+
+C++11 introduced rvalue references (`&&`) to identify temporary objects:
+
+```cpp
+void process(std::vector<int>& vec);        // Lvalue reference
+void process(std::vector<int>&& vec);       // Rvalue reference
+
+std::vector<int> getVector();
+
+std::vector<int> v;
+process(v);              // Calls lvalue version
+process(getVector());    // Calls rvalue version
+process(std::move(v));   // Calls rvalue version
+```
+
+<Callout type="tip">
+  `std::move` doesn't actually move anything—it just casts to an rvalue reference, enabling move operations.
+</Callout>
+
+## Move Constructor and Assignment
+
+```cpp
+class Buffer {
+public:
+    // Move constructor
+    Buffer(Buffer&& other) noexcept
+        : data_(other.data_)
+        , size_(other.size_) {
+        other.data_ = nullptr;  // Leave source in valid state
+        other.size_ = 0;
+    }
+
+    // Move assignment
+    Buffer& operator=(Buffer&& other) noexcept {
+        if (this != &other) {
+            delete[] data_;       // Free existing resource
+            data_ = other.data_;  // Steal resource
+            size_ = other.size_;
+            other.data_ = nullptr;
+            other.size_ = 0;
+        }
+        return *this;
+    }
+
+private:
+    int* data_;
+    size_t size_;
+};
+```
+
+## The Rule of Five
+
+If you define any of these five special members, consider defining all:
+
+1. Destructor
+2. Copy constructor
+3. Copy assignment operator
+4. Move constructor
+5. Move assignment operator
+
+<Callout type="note">
+  Modern C++ best practice: Follow the **Rule of Zero**—design classes so that the compiler-generated special members work correctly.
+</Callout>
+
+## Perfect Forwarding
+
+Preserve value category when passing arguments:
+
+```cpp
+template<typename T, typename... Args>
+std::shared_ptr<T> make_shared(Args&&... args) {
+    return std::shared_ptr<T>(
+        new T(std::forward<Args>(args)...)
+    );
+}
+
+// Usage
+auto ptr = std::make_shared<std::vector<int>>(100, 42);
+// Forwards (100, 42) to vector constructor without copying
+```
+
+## Universal References
+
+`T&&` in a template context is a universal reference:
+
+```cpp
+template<typename T>
+void wrapper(T&& arg) {
+    // arg is lvalue, even if T&& was bound to rvalue
+    foo(std::forward<T>(arg));  // Preserves original value category
+}
+
+int x = 42;
+wrapper(x);              // T is int&, T&& collapses to int&
+wrapper(42);             // T is int, T&& is int&&
+```
+
+## Return Value Optimization (RVO)
+
+<Callout type="warning">
+  Don't `std::move` return values! It prevents RVO/NRVO.
+</Callout>
+
+```cpp
+// GOOD: Let compiler do RVO
+std::vector<int> createVector() {
+    std::vector<int> v = {1, 2, 3};
+    return v;  // NRVO eliminates copy/move
+}
+
+// BAD: Prevents RVO
+std::vector<int> createVector() {
+    std::vector<int> v = {1, 2, 3};
+    return std::move(v);  // Forces move, disables RVO
+}
+```
+
+## Practical Example: Custom Vector
+
+```cpp
+template<typename T>
+class Vector {
+public:
+    // Move constructor
+    Vector(Vector&& other) noexcept
+        : data_(other.data_)
+        , size_(other.size_)
+        , capacity_(other.capacity_) {
+        other.data_ = nullptr;
+        other.size_ = 0;
+        other.capacity_ = 0;
+    }
+
+    // Move assignment
+    Vector& operator=(Vector&& other) noexcept {
+        if (this != &other) {
+            clear();
+            data_ = other.data_;
+            size_ = other.size_;
+            capacity_ = other.capacity_;
+            other.data_ = nullptr;
+            other.size_ = 0;
+            other.capacity_ = 0;
+        }
+        return *this;
+    }
+
+    void push_back(T value) {
+        if (size_ == capacity_) {
+            grow();
+        }
+        data_[size_] = std::move(value);  // Move into place
+        ++size_;
+    }
+
+private:
+    T* data_;
+    size_t size_;
+    size_t capacity_;
+};
+```
+
+## Summary
+
+Move semantics enable:
+- **Zero-cost abstractions** for resource management
+- **Efficient return values** without copying
+- **Generic code** that works with both lvalues and rvalues
+
+Master these concepts for high-performance C++ code.

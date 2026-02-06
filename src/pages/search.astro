@@ -1,0 +1,89 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import SearchModal from '@/components/search/SearchModal';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('posts', ({ data }) => {
+  return import.meta.env.PROD ? !data.draft : true;
+});
+
+// Build search index
+const searchIndex = allPosts.map(post => ({
+  id: post.slug,
+  title: post.data.title,
+  description: post.data.description,
+  content: post.body?.slice(0, 2000) || '', // First 2000 chars for search
+  slug: post.slug,
+  tags: post.data.tags,
+  language: post.data.language,
+}));
+---
+
+<PageLayout title="Search" description="Search all technical notes">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="max-w-2xl mx-auto text-center mb-12">
+      <h1 class="text-3xl sm:text-4xl font-bold text-notion-text dark:text-notion-text-dark mb-4">
+        Search
+      </h1>
+      <p class="text-lg text-notion-text dark:text-notion-text-dark/70">
+        Find notes by title, content, tags, or programming language
+      </p>
+    </div>
+
+    <!-- Search Modal Component -->
+    <SearchModal client:load searchIndex={searchIndex} />
+
+    <!-- Search Tips -->
+    <div class="mt-16 max-w-2xl mx-auto">
+      <h2 class="text-lg font-semibold text-notion-text dark:text-notion-text-dark mb-4">
+        Search Tips
+      </h2>
+      <ul class="space-y-2 text-notion-text dark:text-notion-text-dark/70">
+        <li class="flex items-start gap-2">
+          <span class="text-notion-blue">•</span>
+          Press <kbd class="px-2 py-0.5 bg-notion-gray dark:bg-notion-gray-dark rounded text-sm font-mono">Cmd+K</kbd> (or <kbd class="px-2 py-0.5 bg-notion-gray dark:bg-notion-gray-dark rounded text-sm font-mono">Ctrl+K</kbd>) from any page to open search
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-notion-blue">•</span>
+          Search by programming language (e.g., "C++", "CUDA")
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-notion-blue">•</span>
+          Search by tags (e.g., "algorithms", "memory-management")
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-notion-blue">•</span>
+          Results are ranked by relevance to your query
+        </li>
+      </ul>
+    </div>
+
+    <!-- Popular Searches -->
+    <div class="mt-12 max-w-2xl mx-auto">
+      <h2 class="text-lg font-semibold text-notion-text dark:text-notion-text-dark mb-4">
+        Popular Topics
+      </h2>
+      <div class="flex flex-wrap gap-3">
+        {['C++', 'CUDA', 'CMake', 'Algorithms', 'Smart Pointers', 'Move Semantics'].map(topic => (
+          <button
+            type="button"
+            class="popular-search-btn px-4 py-2 rounded-full bg-notion-gray dark:bg-notion-gray-dark text-notion-text dark:text-notion-text-dark hover:bg-notion-border dark:hover:bg-notion-border-dark transition-colors"
+            data-query={topic}
+          >
+            {topic}
+          </button>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Handle popular search clicks
+    document.querySelectorAll('.popular-search-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const query = btn.getAttribute('data-query');
+        window.dispatchEvent(new CustomEvent('open-search', { detail: { query } }));
+      });
+    });
+  </script>
+</PageLayout>

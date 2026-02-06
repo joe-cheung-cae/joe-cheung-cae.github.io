@@ -1,0 +1,66 @@
+---
+import PostLayout from '@/layouts/PostLayout.astro';
+import { getCollection, getEntry } from 'astro:content';
+import { calculateReadingTime } from '@/utils/readingTime';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  return posts.map(post => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+
+// Calculate reading time if not set
+if (!post.data.readingTime) {
+  const content = post.body || '';
+  post.data.readingTime = calculateReadingTime(content);
+}
+
+// Render content
+const { Content, headings } = await post.render();
+
+// Get all posts for navigation
+const allPosts = await getCollection('posts', ({ data }) => {
+  return import.meta.env.PROD ? !data.draft : true;
+});
+
+const sortedPosts = allPosts.sort((a, b) =>
+  a.data.pubDate.getTime() - b.data.pubDate.getTime()
+);
+
+const currentIndex = sortedPosts.findIndex(p => p.slug === post.slug);
+const prevPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : undefined;
+const nextPost = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentIndex + 1] : undefined;
+
+// Get related posts (same tags or language)
+const relatedPosts = sortedPosts
+  .filter(p => p.slug !== post.slug)
+  .map(p => {
+    let score = 0;
+    // Same language
+    if (p.data.language && p.data.language === post.data.language) {
+      score += 3;
+    }
+    // Shared tags
+    const sharedTags = p.data.tags.filter(tag => post.data.tags.includes(tag));
+    score += sharedTags.length;
+    return { post: p, score };
+  })
+  .filter(({ score }) => score > 0)
+  .sort((a, b) => b.score - a.score)
+  .slice(0, 4)
+  .map(({ post }) => post);
+---
+
+<PostLayout
+  post={post}
+  headings={headings}
+  prevPost={prevPost}
+  nextPost={nextPost}
+  relatedPosts={relatedPosts}
+>
+  <Content />
+</PostLayout>

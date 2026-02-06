@@ -1,0 +1,110 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import Card from '@/components/ui/Card.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  const allTags = [...new Set(posts.flatMap(post => post.data.tags))];
+
+  return allTags.map(tag => ({
+    params: { tag: tag.toLowerCase().replace(/\s+/g, '-') },
+    props: { tag },
+  }));
+}
+
+const { tag } = Astro.props;
+
+const allPosts = await getCollection('posts', ({ data }) => {
+  return import.meta.env.PROD ? !data.draft : true;
+});
+
+// Filter posts by tag (case-insensitive)
+const taggedPosts = allPosts.filter(post =>
+  post.data.tags.some(t => t.toLowerCase() === tag.toLowerCase())
+);
+
+// Sort by date (newest first)
+const sortedPosts = taggedPosts.sort((a, b) =>
+  b.data.pubDate.getTime() - a.data.pubDate.getTime()
+);
+
+// Get related tags (tags that appear with this tag)
+const relatedTagsMap = new Map<string, number>();
+taggedPosts.forEach(post => {
+  post.data.tags.forEach(t => {
+    if (t.toLowerCase() !== tag.toLowerCase()) {
+      relatedTagsMap.set(t, (relatedTagsMap.get(t) || 0) + 1);
+    }
+  });
+});
+
+const relatedTags = Array.from(relatedTagsMap.entries())
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 10)
+  .map(([t]) => t);
+---
+
+<PageLayout title={`#${tag}`} description={`Posts tagged with #${tag}`}>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-sm text-notion-text dark:text-notion-text-dark/60 mb-6">
+      <a href="/tags" class="hover:text-notion-blue transition-colors">Tags</a>
+      <span>/</span>
+      <span class="text-notion-text dark:text-notion-text-dark">#{tag}</span>
+    </nav>
+
+    <!-- Header -->
+    <div class="mb-12">
+      <h1 class="text-3xl sm:text-4xl font-bold text-notion-text dark:text-notion-text-dark mb-4">
+        #{tag}
+      </h1>
+      <p class="text-lg text-notion-text dark:text-notion-text-dark/70">
+        {sortedPosts.length} {sortedPosts.length === 1 ? 'note' : 'notes'} tagged with #{tag}
+      </p>
+    </div>
+
+    <!-- Related Tags -->
+    {relatedTags.length > 0 && (
+      <div class="mb-8">
+        <h2 class="text-sm font-semibold text-notion-text dark:text-notion-text-dark/60 uppercase tracking-wider mb-3">
+          Related Tags
+        </h2>
+        <div class="flex flex-wrap gap-2">
+          {relatedTags.map(relatedTag => (
+            <a
+              href={`/tags/${relatedTag.toLowerCase().replace(/\s+/g, '-')}`}
+              class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-notion-gray dark:bg-notion-gray-dark text-notion-text dark:text-notion-text-dark hover:bg-notion-border dark:hover:bg-notion-border-dark transition-colors"
+            >
+              #{relatedTag}
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <!-- Posts Grid -->
+    {sortedPosts.length > 0 ? (
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {sortedPosts.map(post => (
+          <Card post={post} />
+        ))}
+      </div>
+    ) : (
+      <div class="text-center py-16">
+        <p class="text-notion-text dark:text-notion-text-dark/60">
+          No posts found with this tag.
+        </p>
+        <a
+          href="/tags"
+          class="inline-flex items-center mt-4 text-notion-blue hover:underline"
+        >
+          Browse all tags
+          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+      </div>
+    )}
+  </div>
+</PageLayout>

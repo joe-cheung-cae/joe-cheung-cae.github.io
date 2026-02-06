@@ -1,0 +1,100 @@
+---
+import PageLayout from './PageLayout.astro';
+import TOC from '@/components/navigation/TOC.astro';
+import PrevNext from '@/components/navigation/PrevNext.astro';
+import RelatedPosts from '@/components/RelatedPosts.astro';
+import TagChip from '@/components/ui/TagChip.astro';
+import { formatDate } from '@/utils/formatDate';
+import { formatReadingTime } from '@/utils/readingTime';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'posts'>;
+  headings: Array<{ depth: number; slug: string; text: string }>;
+  prevPost?: CollectionEntry<'posts'>;
+  nextPost?: CollectionEntry<'posts'>;
+  relatedPosts: CollectionEntry<'posts'>[];
+}
+
+const { post, headings, prevPost, nextPost, relatedPosts } = Astro.props;
+const { title, description, pubDate, updatedDate, tags, language, readingTime } = post.data;
+
+const showTOC = headings.length > 0;
+---
+
+<PageLayout
+  title={title}
+  description={description}
+  ogImage={post.data.ogImage}
+  canonicalUrl={post.data.canonicalUrl}
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8">
+      <!-- Main Content -->
+      <article class="min-w-0">
+        <!-- Post Header -->
+        <header class="mb-8">
+          {language && (
+            <div class="mb-4">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-notion-blue-light dark:bg-blue-900/30 text-notion-blue">
+                {language}
+              </span>
+            </div>
+          )}
+
+          <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-notion-text dark:text-notion-text-dark mb-4">
+            {title}
+          </h1>
+
+          <p class="text-lg text-notion-text dark:text-notion-text-dark/80 mb-4">
+            {description}
+          </p>
+
+          <div class="flex flex-wrap items-center gap-4 text-sm text-notion-text dark:text-notion-text-dark/70">
+            <time datetime={pubDate.toISOString()}>
+              {formatDate(pubDate)}
+            </time>
+            {updatedDate && (
+              <span>
+                (Updated: <time datetime={updatedDate.toISOString()}>{formatDate(updatedDate)}</time>)
+              </span>
+            )}
+            {readingTime && (
+              <span>· {formatReadingTime(readingTime)}</span>
+            )}
+          </div>
+
+          {tags.length > 0 && (
+            <div class="flex flex-wrap gap-2 mt-4">
+              {tags.map((tag) => (
+                <TagChip tag={tag} />
+              ))}
+            </div>
+          )}
+        </header>
+
+        <!-- Post Content -->
+        <div class="prose-custom">
+          <slot />
+        </div>
+
+        <!-- Post Footer -->
+        <footer class="mt-12 pt-8 border-t border-notion-border dark:border-notion-border-dark">
+          <PrevNext prev={prevPost} next={nextPost} />
+        </footer>
+
+        <!-- Related Posts -->
+        {relatedPosts.length > 0 && (
+          <RelatedPosts posts={relatedPosts} />
+        )}
+      </article>
+
+      <!-- Sidebar -->
+      <aside class="hidden lg:block">
+        <div class="sticky top-24">
+          {showTOC && <TOC headings={headings} />}
+        </div>
+      </aside>
+    </div>
+  </div>
+</PageLayout>

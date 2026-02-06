@@ -1,0 +1,143 @@
+---
+title: 'C++ RAII and Smart Pointers: A Deep Dive'
+description: 'Understanding Resource Acquisition Is Initialization (RAII) and modern smart pointers in C++ for safe memory management'
+pubDate: 2024-01-15
+tags: ['cpp', 'memory-management', 'raii', 'smart-pointers']
+language: 'C++'
+featured: true
+---
+
+import Callout from '@/components/ui/Callout.astro';
+
+## Introduction
+
+RAII (Resource Acquisition Is Initialization) is one of the most important idioms in C++. It ties resource management to object lifetime, ensuring that resources are properly released when objects go out of scope.
+
+<Callout type="tip">
+  RAII is the foundation of exception-safe code in C++. It eliminates resource leaks even when exceptions are thrown.
+</Callout>
+
+## The Problem with Raw Pointers
+
+Before C++11, manual memory management was error-prone:
+
+```cpp
+void leakyFunction() {
+    int* ptr = new int[100];
+    // What if an exception is thrown here?
+    // Memory leak! The array is never deleted.
+    someRiskyOperation();
+    delete[] ptr;  // May never reach here
+}
+```
+
+## Smart Pointers to the Rescue
+
+### 1. `std::unique_ptr`: Exclusive Ownership
+
+`std::unique_ptr` represents exclusive ownership of a dynamically allocated object.
+
+```cpp
+#include <memory>
+
+void modernFunction() {
+    auto ptr = std::make_unique<int[]>(100);
+    // Memory automatically freed when ptr goes out of scope
+    someRiskyOperation();  // Safe! Memory will be freed even if exception thrown
+}  // Destructor automatically deletes the array
+```
+
+Key characteristics:
+- **Move-only**: Cannot be copied, only moved
+- **Zero overhead**: Same performance as raw pointer
+- **Automatic cleanup**: Destructor handles deallocation
+
+### 2. `std::shared_ptr`: Shared Ownership
+
+Use when multiple parts of your code need to share ownership:
+
+```cpp
+#include <memory>
+
+class Document {
+public:
+    void addView(std::shared_ptr<View> view) {
+        views.push_back(view);
+    }
+private:
+    std::vector<std::shared_ptr<View>> views;
+};
+
+auto doc = std::make_shared<Document>();
+auto view1 = std::make_shared<View>(doc);
+auto view2 = std::make_shared<View>(doc);
+
+doc->addView(view1);
+doc->addView(view2);
+// Document is destroyed only when all references are gone
+```
+
+<Callout type="warning">
+  `std::shared_ptr` has reference counting overhead. Prefer `std::unique_ptr` when possible.
+</Callout>
+
+### 3. `std::weak_ptr`: Non-owning Observer
+
+Breaks circular references and provides temporary access:
+
+```cpp
+class Node {
+public:
+    std::weak_ptr<Node> parent;  // Weak to avoid cycle
+    std::vector<std::shared_ptr<Node>> children;
+};
+
+auto root = std::make_shared<Node>();
+auto child = std::make_shared<Node>();
+child->parent = root;  // Weak reference
+root->children.push_back(child);  // Strong reference
+```
+
+## Custom Deleters
+
+Smart pointers can use custom cleanup logic:
+
+```cpp
+// File handle with custom deleter
+auto file = std::unique_ptr<FILE, decltype(&fclose)>(
+    fopen("data.txt", "r"),
+    &fclose
+);
+
+// Custom array deleter
+struct ArrayDeleter {
+    void operator()(int* p) {
+        std::cout << "Deleting array\n";
+        delete[] p;
+    }
+};
+
+std::unique_ptr<int, ArrayDeleter> arr(new int[100]);
+```
+
+## Best Practices
+
+<Callout type="note">
+  1. **Always use `std::make_unique` and `std::make_shared`** instead of `new`
+  2. **Prefer `std::unique_ptr`** by default
+  3. **Use `std::shared_ptr`** only when ownership must be shared
+  4. **Never mix smart pointers and raw pointers** to the same object
+</Callout>
+
+## Performance Considerations
+
+| Pointer Type | Size | Overhead | Use Case |
+|-------------|------|----------|----------|
+| Raw pointer | 8 bytes | None | Never (use smart pointers) |
+| `unique_ptr` | 8 bytes | None | Exclusive ownership |
+| `shared_ptr` | 16 bytes | Atomic ref count | Shared ownership |
+| `weak_ptr` | 16 bytes | Atomic ref count | Observer pattern |
+
+## Conclusion
+
+RAII and smart pointers transform C++ from a language with manual memory management pitfalls to one with automatic, exception-safe resource handling. Embrace these tools for safer, cleaner code.

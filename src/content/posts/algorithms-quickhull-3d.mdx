@@ -1,0 +1,255 @@
+---
+title: 'QuickHull Algorithm in 3D'
+description: 'Implementing the QuickHull algorithm for computing convex hulls in three dimensions'
+pubDate: 2024-02-15
+tags: ['algorithms', 'computational-geometry', 'cpp', 'convex-hull']
+language: 'C++'
+featured: true
+---
+
+import Callout from '@/components/ui/Callout.astro';
+
+## Introduction
+
+The convex hull of a set of points is the smallest convex set that contains all the points. In 3D, this forms a convex polyhedron. The QuickHull algorithm, inspired by Quicksort, is one of the most practical approaches for computing convex hulls.
+
+## Algorithm Overview
+
+QuickHull follows a divide-and-conquer strategy:
+
+1. **Initialize**: Find a initial tetrahedron (4 non-coplanar points)
+2. **Assign**: For each face, find the farthest outside point
+3. **Expand**: For each face with outside points, create a "horizon" and connect to the farthest point
+4. **Repeat**: Until no outside points remain
+
+<Callout type="tip">
+  QuickHull has O(n log n) average case complexity but O(n²) worst case. In practice, it's often faster than theoretically optimal algorithms.
+</Callout>
+
+## Data Structures
+
+```cpp
+struct Point {
+    double x, y, z;
+
+    Point operator-(const Point& p) const {
+        return {x - p.x, y - p.y, z - p.z};
+    }
+};
+
+struct Face {
+    int vertices[3];        // Indices into point array
+    Point normal;           // Outward-facing normal
+    double offset;          // Plane equation: normal·x + offset = 0
+    std::vector<int> outside;  // Points outside this face
+
+    // Distance from point to face plane
+    double distance(const std::vector<Point>& points, int pointIdx) const {
+        const Point& p = points[pointIdx];
+        return normal.x * p.x + normal.y * p.y + normal.z * p.z + offset;
+    }
+};
+```
+
+## Core Algorithm
+
+### Finding Initial Tetrahedron
+
+```cpp
+class QuickHull3D {
+public:
+    std::vector<Face> compute(const std::vector<Point>& points) {
+        if (points.size() < 4) {
+            throw std::invalid_argument("Need at least 4 points");
+        }
+
+        points_ = points;
+
+        // Find extreme points for initial simplex
+        auto extremes = findExtremePoints();
+
+        // Build initial tetrahedron
+        buildInitialTetrahedron(extremes);
+
+        // Main loop
+        processFaces();
+
+        return hull_;
+    }
+
+private:
+    std::vector<Point> points_;
+    std::vector<Face> hull_;
+
+    void buildInitialTetrahedron(const std::array<int, 6>& extremes) {
+        // Find two most distant points (line)
+        int p1 = extremes[0], p2 = extremes[1];
+
+        // Find point farthest from the line
+        int p3 = findFarthestFromLine(p1, p2);
+
+        // Find point farthest from the plane
+        int p4 = findFarthestFromPlane(p1, p2, p3);
+
+        // Create initial faces (ensure outward normals)
+        addFace(p1, p2, p3, p4);
+        addFace(p1, p2, p4, p3);
+        addFace(p1, p3, p4, p2);
+        addFace(p2, p3, p4, p1);
+    }
+};
+```
+
+### Processing Faces
+
+```cpp
+void processFaces() {
+    std::queue<int> faceQueue;
+    for (int i = 0; i < hull_.size(); ++i) {
+        assignPointsToFace(i);
+        if (!hull_[i].outside.empty()) {
+            faceQueue.push(i);
+        }
+    }
+
+    while (!faceQueue.empty()) {
+        int faceIdx = faceQueue.front();
+        faceQueue.pop();
+
+        Face& face = hull_[faceIdx];
+        if (face.outside.empty()) continue;
+
+        // Find farthest point
+        int farthest = findFarthestPoint(face);
+
+        // Find horizon edges from this face
+        auto horizon = findHorizon(faceIdx, farthest);
+
+        // Remove visible faces and create new ones
+        std::vector<int> newFaces = expandHull(horizon, farthest);
+
+        // Reassign points
+        for (int newFaceIdx : newFaces) {
+            assignPointsToFace(newFaceIdx);
+            if (!hull_[newFaceIdx].outside.empty()) {
+                faceQueue.push(newFaceIdx);
+            }
+        }
+    }
+}
+```
+
+### Finding the Horizon
+
+The horizon is the boundary between faces visible and hidden from the new point:
+
+```cpp
+std::vector<std::pair<int, int>> findHorizon(int startFace, int apex) {
+    std::vector<std::pair<int, int>> horizon;
+    std::unordered_set<int> visible;
+    std::queue<int> toCheck;
+
+    toCheck.push(startFace);
+    visible.insert(startFace);
+
+    while (!toCheck.empty()) {
+        int faceIdx = toCheck.front();
+        toCheck.pop();
+
+        // Check all neighboring faces (simplified - need edge structure)
+        for (int neighbor : getNeighbors(faceIdx)) {
+            if (visible.count(neighbor)) continue;
+
+            if (isVisibleFrom(neighbor, apex)) {
+                visible.insert(neighbor);
+                toCheck.push(neighbor);
+            } else {
+                // This edge is on the horizon
+                horizon.push_back({faceIdx, neighbor});
+            }
+        }
+    }
+
+    // Remove visible faces
+    removeFaces(visible);
+
+    return horizon;
+}
+```
+
+## Geometric Utilities
+
+```cpp
+// Cross product
+Point cross(const Point& a, const Point& b) {
+    return {
+        a.y * b.z - a.z * b.y,
+        a.z * b.x - a.x * b.z,
+        a.x * b.y - a.y * b.x
+    };
+}
+
+// Dot product
+double dot(const Point& a, const Point& b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+// Normalized cross product for face normal
+Point computeNormal(int i, int j, int k) {
+    Point ab = points_[j] - points_[i];
+    Point ac = points_[k] - points_[i];
+    Point n = cross(ab, ac);
+
+    double len = std::sqrt(dot(n, n));
+    if (len > 0) {
+        n.x /= len; n.y /= len; n.z /= len;
+    }
+    return n;
+}
+```
+
+<Callout type="warning">
+  Numerical stability is crucial. Use epsilon comparisons and consider robust arithmetic for degenerate cases.
+</Callout>
+
+## Complexity Analysis
+
+| Phase | Complexity | Notes |
+|-------|-----------|-------|
+| Initial simplex | O(n) | Finding extremes |
+| Point assignment | O(n) per face | Can be optimized with spatial structures |
+| Horizon finding | O(f) | f = visible faces |
+| Total (average) | O(n log n) | Similar to Quicksort |
+| Total (worst) | O(n²) | All points on hull, bad pivot choices |
+
+## Optimizations
+
+1. **Conflict graph**: Track which points can see which faces
+2. **Spatial partitioning**: Use octrees or grids for faster point assignment
+3. **Parallel processing**: Independent faces can be processed concurrently
+
+## Visualization
+
+```cpp
+// Export to OBJ format for visualization
+void exportOBJ(const std::string& filename) {
+    std::ofstream file(filename);
+
+    // Vertices
+    for (const auto& p : points_) {
+        file << "v " << p.x << " " << p.y << " " << p.z << "\n";
+    }
+
+    // Faces (1-indexed in OBJ)
+    for (const auto& f : hull_) {
+        file << "f "
+            << (f.vertices[0] + 1) << " "
+            << (f.vertices[1] + 1) << " "
+            << (f.vertices[2] + 1) << "\n";
+    }
+}
+```
+
+## Conclusion
+
+QuickHull3D elegantly extends the 2D algorithm to three dimensions. While conceptually simple, careful attention to geometric predicates and numerical stability is essential for a robust implementation.

@@ -1,0 +1,47 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Header from '@/components/navigation/Header.astro';
+import Footer from '@/components/navigation/Footer.astro';
+import SearchModal from '@/components/search/SearchModal';
+import { getCollection } from 'astro:content';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  canonicalUrl?: string;
+  noIndex?: boolean;
+}
+
+const { title, description, ogImage, canonicalUrl, noIndex } = Astro.props;
+
+// Build search index for the modal
+const allPosts = await getCollection('posts', ({ data }) => {
+  return import.meta.env.PROD ? !data.draft : true;
+});
+
+const searchIndex = allPosts.map(post => ({
+  id: post.slug,
+  title: post.data.title,
+  description: post.data.description,
+  content: post.body?.slice(0, 2000) || '',
+  slug: post.slug,
+  tags: post.data.tags,
+  language: post.data.language,
+}));
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  ogImage={ogImage}
+  canonicalUrl={canonicalUrl}
+  noIndex={noIndex}
+>
+  <Header />
+  <main class="flex-1">
+    <slot />
+  </main>
+  <Footer />
+  <SearchModal client:idle searchIndex={searchIndex} />
+</BaseLayout>

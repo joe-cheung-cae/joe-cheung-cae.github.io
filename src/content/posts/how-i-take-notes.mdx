@@ -1,0 +1,198 @@
+---
+title: 'How I Take Technical Notes'
+description: 'My system for capturing, organizing, and retrieving technical knowledge'
+pubDate: 2024-03-01
+tags: ['productivity', 'note-taking', 'knowledge-management']
+featured: true
+---
+
+import Callout from '@/components/ui/Callout.astro';
+
+## The Problem with Digital Notes
+
+I've tried dozens of note-taking apps over the years. They all failed me in the same way: **I could never find what I wrote when I needed it**. The friction between capturing and retrieving knowledge was too high.
+
+This blog is my solution—a searchable, tag-based system that mimics how my brain works.
+
+## Core Principles
+
+### 1. Atomic Notes
+
+Each note covers one concept. If I can't explain it in 500 words, I break it down.
+
+**Bad:** "Everything about C++"
+**Good:** "C++ Move Semantics"
+
+### 2. Progressive Summarization
+
+I write notes in layers:
+
+1. **Layer 1**: Raw capture (code snippets, quick thoughts)
+2. **Layer 2**: Bold the key points
+3. **Layer 3**: Highlight the essentials
+4. **Layer 4**: Executive summary at the top
+
+<Callout type="tip">
+  Start with Layer 1. Don't let perfect be the enemy of good. You can always refine later.
+</Callout>
+
+### 3. Link Everything
+
+Notes don't exist in isolation. I link related concepts:
+
+- **Up**: Parent concepts (Move Semantics → C++ Performance)
+- **Down**: Child concepts (Move Semantics → Perfect Forwarding)
+- **Across**: Related ideas (Move Semantics → RAII)
+
+## My Workflow
+
+### Capture Phase
+
+When learning something new:
+
+1. **Immediate**: Jot down in a scratch file
+2. **Same day**: Expand into a proper note
+3. **Within week**: Refine and connect to existing notes
+
+```
+Inbox/
+├── quick-thoughts.md
+├── code-snippets.cpp
+└── links-to-process.md
+
+Notes/
+├── cpp/
+│   ├── move-semantics.mdx
+│   ├── raii.mdx
+│   └── templates.mdx
+├── algorithms/
+│   ├── quickhull.mdx
+│   └── graph-traversal.mdx
+└── tools/
+    ├── cmake.mdx
+    └── git.mdx
+```
+
+### Organization
+
+I use a flat structure with heavy tagging:
+
+- **By topic**: `cpp`, `algorithms`, `tools`
+- **By language**: `C++`, `Python`, `Rust`
+- **By status**: `draft`, `review`, `complete`
+- **By depth**: `overview`, `tutorial`, `reference`
+
+### Retrieval
+
+Three ways to find notes:
+
+1. **Search**: Full-text search across all content
+2. **Tags**: Browse by topic or language
+3. **Links**: Follow connections from related notes
+
+## The PARA Method
+
+I adapt Tiago Forte's PARA system:
+
+| Category | Purpose | Example |
+|----------|---------|---------|
+| **Projects** | Notes with deadlines | "Implement QuickHull" |
+| **Areas** | Ongoing responsibilities | "C++ Performance" |
+| **Resources** | Reference material | "CMake Cookbook" |
+| **Archive** | Completed/inactive | Old project notes |
+
+## Tools I Use
+
+<Callout type="note">
+  The best tool is the one you'll actually use. I built this blog because existing tools didn't match my mental model. Your mileage may vary.
+</Callout>
+
+### For This Blog
+
+- **Astro**: Static site generation
+- **MDX**: Markdown with React components
+- **MiniSearch**: Client-side search
+- **Git**: Version control
+
+### For Quick Capture
+
+- **VS Code**: Primary editor
+- **GitHub Issues**: Track ideas
+- **Physical notebook**: Diagrams and sketches
+
+## Note Templates
+
+### Algorithm Note
+
+```markdown
+## Problem
+What does this solve?
+
+## Intuition
+How would you explain this to a 5-year-old?
+
+## Algorithm
+Step-by-step description.
+
+## Complexity
+| Case | Time | Space |
+|------|------|-------|
+| Best | O(n) | O(1) |
+| Average | O(n log n) | O(log n) |
+| Worst | O(n²) | O(n) |
+
+## Implementation
+Key code snippets.
+
+## Variations
+Related algorithms and modifications.
+
+## References
+Links to papers, videos, articles.
+```
+
+### Language Feature Note
+
+```markdown
+## What Is It?
+One-sentence definition.
+
+## Why Use It?
+Benefits and use cases.
+
+## Syntax
+Minimal example.
+
+## Deep Dive
+How it works under the hood.
+
+## Common Pitfalls
+Mistakes to avoid.
+
+## Best Practices
+How to use it well.
+```
+
+## Weekly Review
+
+Every Sunday, I spend 30 minutes:
+
+1. Process inbox notes
+2. Review and refine recent notes
+3. Look for connections between notes
+4. Identify gaps in my knowledge
+
+## Measuring Success
+
+I know my system works when:
+
+- ✅ I can find a note in under 10 seconds
+- ✅ I write notes without friction
+- ✅ I revisit and improve old notes
+- ✅ I connect ideas across domains
+
+## Conclusion
+
+Good note-taking isn't about capturing everything—it's about **building a personal knowledge base that compounds over time**. Start simple, stay consistent, and let your system evolve with your needs.
+
+The goal isn't perfect notes. The goal is **better thinking**.
