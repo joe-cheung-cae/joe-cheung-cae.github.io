@@ -2,13 +2,15 @@
 import ThemeToggle from '../ThemeToggle';
 import { siteConfig } from '@/site.config';
 
+const baseUrl = import.meta.env.BASE_URL || '/';
+
 const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/tags', label: 'Tags' },
-  { href: '/languages', label: 'Languages' },
-  { href: '/about', label: 'About' },
-  { href: '/projects', label: 'Projects' },
+  { href: baseUrl, label: 'Home' },
+  { href: `${baseUrl}blog`, label: 'Blog' },
+  { href: `${baseUrl}tags`, label: 'Tags' },
+  { href: `${baseUrl}languages`, label: 'Languages' },
+  { href: `${baseUrl}about`, label: 'About' },
+  { href: `${baseUrl}projects`, label: 'Projects' },
 ];
 
 const currentPath = Astro.url.pathname;
@@ -18,7 +20,7 @@ const currentPath = Astro.url.pathname;
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
       <!-- Logo -->
-      <a href="/" class="flex items-center gap-2 text-xl font-bold text-notion-text dark:text-notion-text-dark hover:text-notion-blue transition-colors">
+      <a href={baseUrl} class="flex items-center gap-2 text-xl font-bold text-notion-text dark:text-notion-text-dark hover:text-notion-blue transition-colors">
         <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
           <polyline points="14 2 14 8 20 8"></polyline>

@@ -1,5 +1,7 @@
 ---
 import PageLayout from '@/layouts/PageLayout.astro';
+
+const baseUrl = import.meta.env.BASE_URL || '/';
 ---
 
 <PageLayout title="404 - Page Not Found" description="The page you're looking for doesn't exist" noIndex>
@@ -15,7 +17,7 @@ import PageLayout from '@/layouts/PageLayout.astro';
 
       <div class="flex flex-wrap justify-center gap-4">
         <a
-          href="/"
+          href={baseUrl}
           class="inline-flex items-center px-6 py-3 rounded-lg bg-notion-blue text-white font-medium hover:bg-notion-blue/90 transition-colors"
         >
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -24,7 +26,7 @@ import PageLayout from '@/layouts/PageLayout.astro';
           Go Home
         </a>
         <a
-          href="/blog"
+          href={`${baseUrl}blog`}
           class="inline-flex items-center px-6 py-3 rounded-lg border border-notion-border dark:border-notion-border-dark text-notion-text dark:text-notion-text-dark font-medium hover:bg-notion-gray dark:hover:bg-notion-gray-dark transition-colors"
         >
           Browse Notes
@@ -37,10 +39,10 @@ import PageLayout from '@/layouts/PageLayout.astro';
           Popular Destinations
         </h3>
         <div class="flex flex-wrap justify-center gap-4">
-          <a href="/tags/cpp" class="text-notion-blue hover:underline">#cpp</a>
-          <a href="/tags/algorithms" class="text-notion-blue hover:underline">#algorithms</a>
-          <a href="/languages/c++" class="text-notion-blue hover:underline">C++</a>
-          <a href="/about" class="text-notion-blue hover:underline">About</a>
+          <a href={`${baseUrl}tags/cpp`} class="text-notion-blue hover:underline">#cpp</a>
+          <a href={`${baseUrl}tags/algorithms`} class="text-notion-blue hover:underline">#algorithms</a>
+          <a href={`${baseUrl}languages/c++`} class="text-notion-blue hover:underline">C++</a>
+          <a href={`${baseUrl}about`} class="text-notion-blue hover:underline">About</a>
         </div>
       </div>
     </div>

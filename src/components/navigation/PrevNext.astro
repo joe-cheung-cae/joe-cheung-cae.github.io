@@ -7,13 +7,15 @@ interface Props {
 }
 
 const { prev, next } = Astro.props;
+
+const baseUrl = import.meta.env.BASE_URL || '/';
 ---
 
 {(prev || next) && (
   <nav class="flex flex-col sm:flex-row gap-4 sm:gap-8">
     {prev && (
       <a
-        href={`/blog/${prev.slug}`}
+        href={`${baseUrl}blog/${prev.slug}`}
         class="group flex-1 p-4 rounded-lg border border-notion-border dark:border-notion-border-dark hover:border-notion-blue dark:hover:border-notion-blue transition-colors"
       >
         <span class="flex items-center gap-2 text-sm text-notion-text dark:text-notion-text-dark/60 mb-1">
@@ -31,7 +33,7 @@ const { prev, next } = Astro.props;
 
     {next && (
       <a
-        href={`/blog/${next.slug}`}
+        href={`${baseUrl}blog/${next.slug}`}
         class="group flex-1 p-4 rounded-lg border border-notion-border dark:border-notion-border-dark hover:border-notion-blue dark:hover:border-notion-blue transition-colors text-right"
       >
         <span class="flex items-center justify-end gap-2 text-sm text-notion-text dark:text-notion-text-dark/60 mb-1">
