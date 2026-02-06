@@ -5,8 +5,8 @@ import tailwind from '@astrojs/tailwind';
 import preact from '@astrojs/preact';
 
 export default defineConfig({
-  site: 'https://chaoboli.github.io',
-  base: '/notion-like-tech-notes',
+  site: 'https://joe-cheung-cae.github.io',
+  base: '/joe-blog',
   integrations: [
     mdx(),
     sitemap(),

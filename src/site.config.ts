@@ -3,9 +3,9 @@ export const siteConfig = {
   description: 'A notion-like blog for technical notes on algorithms, C++, CMake, CUDA, and more.',
   author: 'Tech Notes Author',
   email: 'author@example.com',
-  siteUrl: 'https://chaoboli.github.io/notion-like-tech-notes',
+  siteUrl: 'https://joe-cheung-cae.github.io/joe-blog',
   social: {
-    github: 'https://github.com/chaoboli',
+    github: 'https://github.com/joe-cheung-cae',
     twitter: 'https://twitter.com/username',
     linkedin: 'https://linkedin.com/in/username',
   },
