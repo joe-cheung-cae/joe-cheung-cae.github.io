@@ -1,9 +1,16 @@
+import { getSiteUrl, getSiteOrigin } from '@/utils/deployment';
+
 export const siteConfig = {
   title: 'Tech Notes',
   description: 'A notion-like blog for technical notes on algorithms, C++, CMake, CUDA, and more.',
   author: 'Tech Notes Author',
   email: 'author@example.com',
-  siteUrl: 'https://joe-cheung-cae.github.io/joe-blog',
+  get siteUrl() {
+    return getSiteUrl();
+  },
+  get siteOrigin() {
+    return getSiteOrigin();
+  },
   social: {
     github: 'https://github.com/joe-cheung-cae',
     twitter: 'https://twitter.com/username',

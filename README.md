@@ -78,17 +78,23 @@ Your content here...
 
 ## Deployment
 
-### Vercel
+| Backend | Method | Command |
+|---------|--------|---------|
+| **Local** | Development server | `npm run dev` |
+| **GitHub Pages** | Deploy from branch | `npm run deploy:github` |
+| **Docker** | Self-hosted container | `npm run deploy:docker` |
+
+### GitHub Pages
+
+Deploy to GitHub Pages using "deploy from a branch":
+
 ```bash
-npm i -g vercel
-vercel --prod
+npm run deploy:github
 ```
 
-### Netlify
-```bash
-npm i -g netlify-cli
-netlify deploy --prod --dir=dist
-```
+This builds the site and pushes the `dist/` folder to the `gh-pages` branch.
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed setup instructions.
 
 ## License
 

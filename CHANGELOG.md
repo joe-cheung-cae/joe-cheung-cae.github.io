@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2024-02-07
+
+### Added
+- Multi-backend deployment support
+  - Local deployment with `npm run build:local`
+  - GitHub Pages deployment with `npm run build:github`
+  - Docker deployment with `npm run deploy:docker`
+- Environment-based configuration system (.env.local, .env.github, .env.docker)
+- Docker and docker-compose configuration files
+- nginx configuration for optimized static file serving
+- Deployment-specific build scripts in package.json
+- Comprehensive deployment documentation (DEPLOYMENT.md)
+
+### Changed
+- `astro.config.mjs` now uses environment variables for site/base URLs
+- `site.config.ts` now dynamically determines siteUrl from deployment environment
+- Updated GitHub remote to `git@github.com:joe-cheung-cae/joe-cheung-cae.github.io.git`
+- Changed `DEPLOY_BASE` from `/joe-blog` to `/` for user site deployment
+- Switched to "deploy from a branch" method for GitHub Pages (using `gh-pages` tool)
+- Removed GitHub Actions workflow in favor of branch-based deployment
+
 ## [1.0.0] - 2024-02-06
 
 ### Added

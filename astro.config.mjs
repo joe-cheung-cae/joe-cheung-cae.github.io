@@ -3,10 +3,17 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import tailwind from '@astrojs/tailwind';
 import preact from '@astrojs/preact';
+import { config } from 'dotenv';
+
+// Load environment variables from .env file
+config();
+
+const site = process.env.DEPLOY_SITE || 'http://localhost:4321';
+const base = process.env.DEPLOY_BASE || '/';
 
 export default defineConfig({
-  site: 'https://joe-cheung-cae.github.io',
-  base: '/joe-blog',
+  site,
+  base,
   integrations: [
     mdx(),
     sitemap(),

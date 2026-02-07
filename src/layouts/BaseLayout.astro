@@ -19,8 +19,10 @@ const {
 } = Astro.props;
 
 const fullTitle = title === siteConfig.title ? title : `${title} | ${siteConfig.title}`;
+const siteOrigin = siteConfig.siteOrigin;
 const siteUrl = siteConfig.siteUrl;
-const canonical = canonicalUrl || `${siteUrl}${Astro.url.pathname}`;
+// Use siteOrigin for canonical to avoid double base path (Astro.url.pathname already includes base)
+const canonical = canonicalUrl || `${siteOrigin}${Astro.url.pathname}`;
 const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`;
 ---
 

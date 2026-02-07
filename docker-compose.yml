@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  blog:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: joe-blog:latest
+    container_name: joe-blog
+    ports:
+      - "8080:80"
+    restart: unless-stopped

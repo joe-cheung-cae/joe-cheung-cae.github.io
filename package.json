@@ -5,23 +5,30 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "build:local": "cp .env.local .env && astro build",
+    "build:github": "cp .env.github .env && astro build",
+    "build:docker": "cp .env.docker .env && astro build",
     "preview": "astro preview",
+    "preview:docker": "docker run -p 8080:80 joe-blog",
+    "deploy:github": "npm run build:github && gh-pages -d dist",
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.0.0",
     "@astrojs/mdx": "^4.0.0",
-    "@astrojs/sitemap": "^3.2.0",
-    "@astrojs/rss": "^4.0.0",
-    "@astrojs/tailwind": "^6.0.0",
     "@astrojs/preact": "^4.0.0",
+    "@astrojs/rss": "^4.0.0",
+    "@astrojs/sitemap": "^3.2.0",
+    "@astrojs/tailwind": "^6.0.0",
+    "@tailwindcss/typography": "^0.5.15",
+    "astro": "^5.0.0",
+    "dotenv": "^17.2.4",
+    "minisearch": "^7.1.0",
     "preact": "^10.25.0",
     "tailwindcss": "^3.4.0",
-    "@tailwindcss/typography": "^0.5.15",
-    "minisearch": "^7.1.0",
     "zod": "^3.23.0"
   },
   "devDependencies": {
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "gh-pages": "^6.1.1"
   }
 }
