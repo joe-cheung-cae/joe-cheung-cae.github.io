@@ -10,7 +10,7 @@
     "build:docker": "cp .env.docker .env && astro build",
     "preview": "astro preview",
     "preview:docker": "docker run -p 8080:80 joe-blog",
-    "deploy:github": "npm run build:github && gh-pages -d dist",
+    "deploy:github": "npm run build:github && touch dist/.nojekyll && gh-pages -d dist --dotfiles",
     "astro": "astro"
   },
   "dependencies": {
