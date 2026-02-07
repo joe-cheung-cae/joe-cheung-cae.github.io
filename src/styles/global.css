@@ -48,7 +48,8 @@
     @apply prose-code:bg-notion-gray dark:prose-code:bg-notion-gray-dark;
     @apply prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm;
     @apply prose-pre:bg-notion-gray dark:prose-pre:bg-notion-gray-dark;
-    @apply prose-pre:rounded-lg prose-pre:p-4;
+    @apply prose-pre:rounded-xl prose-pre:p-4 prose-pre:overflow-x-auto;
+    @apply prose-pre:shadow-sm dark:prose-pre:shadow-black/20;
     @apply prose-pre:border prose-pre:border-notion-border dark:prose-pre:border-notion-border-dark;
     @apply prose-img:rounded-lg prose-img:my-6;
     @apply prose-blockquote:border-l-4 prose-blockquote:border-notion-blue;
@@ -79,6 +80,31 @@
 
   .search-highlight {
     @apply bg-yellow-200 dark:bg-yellow-700;
+  }
+
+  .prose-custom pre.astro-code {
+    padding: 1rem 1.125rem;
+    line-height: 1.65;
+    tab-size: 2;
+  }
+
+  .prose-custom pre.astro-code code {
+    background: transparent !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .prose-custom pre.astro-code::-webkit-scrollbar {
+    height: 10px;
+  }
+
+  .prose-custom pre.astro-code::-webkit-scrollbar-thumb {
+    background: rgba(107, 114, 128, 0.45);
+    border-radius: 9999px;
+  }
+
+  .dark .prose-custom pre.astro-code::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.4);
   }
 }
 
@@ -112,6 +138,16 @@
 }
 
 /* Shiki dual theme support - Light mode (default) */
+.astro-code {
+  border-radius: 0.75rem !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 8px 24px -16px rgba(15, 23, 42, 0.35);
+  overflow-x: auto !important;
+  padding: 1rem 1.125rem !important;
+  line-height: 1.65;
+  tab-size: 2;
+}
+
 .astro-code,
 .astro-code span {
   color: var(--shiki-light) !important;
@@ -129,4 +165,9 @@
   font-style: var(--shiki-dark-font-style) !important;
   font-weight: var(--shiki-dark-font-weight) !important;
   text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+
+.dark .astro-code {
+  border-color: var(--border-color) !important;
+  box-shadow: 0 10px 28px -18px rgba(0, 0, 0, 0.75);
 }

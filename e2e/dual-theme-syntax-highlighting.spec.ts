@@ -31,6 +31,26 @@ test.describe('Dual Theme Syntax Highlighting', () => {
     expect(firstCodeText?.length).toBeGreaterThan(0);
   });
 
+  test('code blocks have enhanced container styling for readability', async ({ page }) => {
+    const codeBlock = page.locator('.astro-code').first();
+    await expect(codeBlock).toBeVisible();
+
+    const styles = await codeBlock.evaluate((el) => {
+      const computed = window.getComputedStyle(el);
+      return {
+        borderTopWidth: computed.borderTopWidth,
+        borderTopLeftRadius: computed.borderTopLeftRadius,
+        boxShadow: computed.boxShadow,
+        overflowX: computed.overflowX,
+      };
+    });
+
+    expect(parseFloat(styles.borderTopWidth)).toBeGreaterThan(0);
+    expect(parseFloat(styles.borderTopLeftRadius)).toBeGreaterThanOrEqual(12);
+    expect(styles.boxShadow).not.toBe('none');
+    expect(styles.overflowX).toBe('auto');
+  });
+
   test('light mode displays GitHub Light theme colors', async ({ page }) => {
     // Ensure we're in light mode (no dark class on HTML)
     const html = page.locator('html');
