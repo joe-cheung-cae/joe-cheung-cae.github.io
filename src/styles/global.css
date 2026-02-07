@@ -47,7 +47,9 @@
     @apply prose-code:text-notion-text dark:prose-code:text-notion-text-dark;
     @apply prose-code:bg-notion-gray dark:prose-code:bg-notion-gray-dark;
     @apply prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm;
-    @apply prose-pre:bg-[#1e1e1e] prose-pre:rounded-lg prose-pre:p-4;
+    @apply prose-pre:bg-notion-gray dark:prose-pre:bg-notion-gray-dark;
+    @apply prose-pre:rounded-lg prose-pre:p-4;
+    @apply prose-pre:border prose-pre:border-notion-border dark:prose-pre:border-notion-border-dark;
     @apply prose-img:rounded-lg prose-img:my-6;
     @apply prose-blockquote:border-l-4 prose-blockquote:border-notion-blue;
     @apply prose-blockquote:pl-4 prose-blockquote:italic;

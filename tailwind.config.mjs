@@ -52,8 +52,8 @@ export default {
               content: 'none',
             },
             pre: {
-              backgroundColor: '#1e1e1e',
-              color: '#d4d4d4',
+              backgroundColor: theme('colors.notion.gray'),
+              color: theme('colors.notion.text'),
             },
           },
         },
@@ -80,6 +80,10 @@ export default {
               color: theme('colors.notion.text-dark'),
             },
             strong: {
+              color: theme('colors.notion.text-dark'),
+            },
+            pre: {
+              backgroundColor: theme('colors.notion.gray-dark'),
               color: theme('colors.notion.text-dark'),
             },
           },
