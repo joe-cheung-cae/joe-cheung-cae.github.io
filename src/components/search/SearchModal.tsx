@@ -14,6 +14,10 @@ interface SearchModalProps {
   searchIndex: SearchDocument[];
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export default function SearchModal({ searchIndex }: SearchModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -99,26 +103,54 @@ export default function SearchModal({ searchIndex }: SearchModalProps) {
     setSelectedIndex(0);
   }, [query, search]);
 
-  const handleKeyDown = (e: KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (!isOpen) return;
+    const controlKeys = new Set(['Escape', 'ArrowDown', 'ArrowUp', 'Enter']);
+    if (!controlKeys.has(e.key) && (e.isComposing || (e as KeyboardEvent & { keyCode?: number }).keyCode === 229)) return;
+
     if (e.key === 'Escape') {
+      e.preventDefault();
       setIsOpen(false);
       return;
     }
 
+    if (results.length === 0) return;
+
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setSelectedIndex((prev) => (prev + 1) % results.length);
-    } else if (e.key === 'ArrowUp') {
+      return;
+    }
+
+    if (e.key === 'ArrowUp') {
       e.preventDefault();
       setSelectedIndex((prev) => (prev - 1 + results.length) % results.length);
-    } else if (e.key === 'Enter' && results[selectedIndex]) {
+      return;
+    }
+
+    if (e.key === 'Enter' && results[selectedIndex]) {
+      e.preventDefault();
       window.location.href = `/blog/${results[selectedIndex].slug}`;
     }
-  };
+  }, [isOpen, results, selectedIndex]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, handleKeyDown]);
+
+  useEffect(() => {
+    if (!resultsRef.current || results.length === 0) return;
+
+    const selectedItem = resultsRef.current.querySelectorAll('ul li a')[selectedIndex] as HTMLElement | undefined;
+    selectedItem?.scrollIntoView({ block: 'nearest' });
+  }, [selectedIndex, results.length]);
 
   const highlightMatch = (text: string, query: string) => {
     if (!query) return text;
-    const regex = new RegExp(`(${query})`, 'gi');
+    const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
     const parts = text.split(regex);
     return parts.map((part, i) =>
       regex.test(part) ? (
@@ -149,7 +181,6 @@ export default function SearchModal({ searchIndex }: SearchModalProps) {
             type="text"
             value={query}
             onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
-            onKeyDown={handleKeyDown}
             placeholder="Search posts, tags, or languages..."
             className="flex-1 bg-transparent text-notion-text dark:text-notion-text-dark placeholder:text-notion-text dark:placeholder:text-notion-text-dark/50 focus:outline-none text-lg"
           />
