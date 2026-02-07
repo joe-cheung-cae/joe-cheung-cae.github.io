@@ -4,7 +4,7 @@ export const siteConfig = {
   title: 'Tech Notes',
   description: 'A notion-like blog for technical notes on algorithms, C++, CMake, CUDA, and more.',
   author: 'Tech Notes Author',
-  email: 'author@example.com',
+  email: 'zhangchao.simzc@outlook.com',
   get siteUrl() {
     return getSiteUrl();
   },
@@ -13,7 +13,6 @@ export const siteConfig = {
   },
   social: {
     github: 'https://github.com/joe-cheung-cae',
-    twitter: 'https://twitter.com/username',
     linkedin: 'https://linkedin.com/in/username',
   },
   pagination: {
