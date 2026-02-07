@@ -13,14 +13,29 @@ const { post, featured = false } = Astro.props;
 const { title, description, pubDate, tags, language, readingTime } = post.data;
 
 const baseUrl = import.meta.env.BASE_URL || '/';
+const previewText = description.length > 120 ? `${description.slice(0, 117)}...` : description;
+const visibleTagCount = featured ? 5 : 3;
 ---
 
 <article class={`group ${featured ? 'col-span-full' : ''}`}>
   <a
     href={`${baseUrl}blog/${post.slug}`}
-    class="block p-6 rounded-xl border border-notion-border dark:border-notion-border-dark bg-notion-bg dark:bg-notion-bg-dark hover:border-notion-blue dark:hover:border-notion-blue transition-all duration-200 hover:shadow-lg"
+    class="block p-6 rounded-xl border border-notion-border dark:border-notion-border-dark bg-notion-bg dark:bg-notion-bg-dark hover:border-notion-blue dark:hover:border-notion-blue transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
   >
-    <div class="flex flex-col gap-3">
+    <div class="flex flex-col gap-4">
+      <div class={`rounded-lg border border-notion-border dark:border-notion-border-dark px-4 py-3 ${
+        featured
+          ? 'bg-gradient-to-r from-notion-blue-light to-notion-gray dark:from-blue-900/20 dark:to-notion-gray-dark/70'
+          : 'bg-notion-gray dark:bg-notion-gray-dark/60'
+      }`}>
+        <p class="text-[11px] uppercase tracking-[0.12em] text-notion-text dark:text-notion-text-dark/70 font-semibold">
+          Quick Preview
+        </p>
+        <p class="mt-1 text-sm text-notion-text dark:text-notion-text-dark/80 line-clamp-2">
+          {previewText}
+        </p>
+      </div>
+
       {/* Header */}
       <div class="flex items-start justify-between gap-4">
         <div class="flex-1 min-w-0">
@@ -46,7 +61,7 @@ const baseUrl = import.meta.env.BASE_URL || '/';
       </p>
 
       {/* Footer */}
-      <div class="flex flex-wrap items-center gap-3 text-sm text-notion-text dark:text-notion-text-dark/60 mt-1">
+      <div class="flex flex-wrap items-center gap-2 text-sm text-notion-text dark:text-notion-text-dark/60 mt-1">
         <time datetime={pubDate.toISOString()}>
           {formatDate(pubDate)}
         </time>
@@ -56,21 +71,32 @@ const baseUrl = import.meta.env.BASE_URL || '/';
             <span>{formatReadingTime(readingTime)}</span>
           </>
         )}
+        {tags.length > 0 && (
+          <>
+            <span>·</span>
+            <span>{tags.length} topic{tags.length > 1 ? 's' : ''}</span>
+          </>
+        )}
       </div>
 
       {/* Tags */}
       {tags.length > 0 && (
         <div class="flex flex-wrap gap-2 mt-1">
-          {tags.slice(0, featured ? 5 : 3).map((tag) => (
-            <TagChip tag={tag} size="sm" />
+          {tags.slice(0, visibleTagCount).map((tag) => (
+            <TagChip tag={tag} size="sm" interactive={false} />
           ))}
-          {tags.length > (featured ? 5 : 3) && (
+          {tags.length > visibleTagCount && (
             <span class="text-xs text-notion-text dark:text-notion-text-dark/50 px-2 py-0.5">
-              +{tags.length - (featured ? 5 : 3)} more
+              +{tags.length - visibleTagCount} more
             </span>
           )}
         </div>
       )}
+
+      <span class="inline-flex items-center gap-1 text-sm font-medium text-notion-blue mt-1">
+        Read note
+        <span aria-hidden="true">→</span>
+      </span>
     </div>
   </a>
 </article>

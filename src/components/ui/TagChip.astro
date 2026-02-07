@@ -2,9 +2,10 @@
 interface Props {
   tag: string;
   size?: 'sm' | 'md';
+  interactive?: boolean;
 }
 
-const { tag, size = 'md' } = Astro.props;
+const { tag, size = 'md', interactive = true } = Astro.props;
 
 const baseUrl = import.meta.env.BASE_URL || '/';
 
@@ -14,9 +15,17 @@ const sizeClasses = {
 };
 ---
 
-<a
-  href={`${baseUrl}tags/${tag.toLowerCase().replace(/\s+/g, '-')}`}
-  class={`inline-flex items-center rounded-full font-medium bg-notion-gray dark:bg-notion-gray-dark text-notion-text dark:text-notion-text-dark hover:bg-notion-border dark:hover:bg-notion-border-dark transition-colors ${sizeClasses[size]}`}
->
-  #{tag}
-</a>
+{interactive ? (
+  <a
+    href={`${baseUrl}tags/${tag.toLowerCase().replace(/\s+/g, '-')}`}
+    class={`inline-flex items-center rounded-full font-medium bg-notion-gray dark:bg-notion-gray-dark text-notion-text dark:text-notion-text-dark hover:bg-notion-border dark:hover:bg-notion-border-dark transition-colors ${sizeClasses[size]}`}
+  >
+    #{tag}
+  </a>
+) : (
+  <span
+    class={`inline-flex items-center rounded-full font-medium bg-notion-gray dark:bg-notion-gray-dark text-notion-text dark:text-notion-text-dark ${sizeClasses[size]}`}
+  >
+    #{tag}
+  </span>
+)}
