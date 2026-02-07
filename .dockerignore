@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+README-ASTRO.md
+CHANGELOG.md
+.notes
+docs
+.github
+*.md
+!.env.docker
