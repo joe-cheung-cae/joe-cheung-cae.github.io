@@ -6,16 +6,16 @@ export default {
     extend: {
       colors: {
         notion: {
-          bg: '#ffffff',
-          'bg-dark': '#191919',
-          gray: '#f5f5f5',
-          'gray-dark': '#2f2f2f',
-          text: '#37352f',
-          'text-dark': '#e3e2e0',
-          border: '#e3e2e0',
-          'border-dark': '#444444',
-          blue: '#2eaadc',
-          'blue-light': '#e7f3f8',
+          bg: '#f6f3ec',
+          'bg-dark': '#111314',
+          gray: '#ebe6db',
+          'gray-dark': '#1a1d1f',
+          text: '#1c1915',
+          'text-dark': '#e8e4dc',
+          border: '#d8d2c6',
+          'border-dark': '#2a2e32',
+          blue: '#9a7048',
+          'blue-light': '#f0e6d6',
           yellow: '#fef3c7',
           orange: '#ffedd5',
           red: '#fee2e2',
@@ -24,8 +24,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+        sans: ['IBM Plex Sans', 'system-ui', 'sans-serif'],
+        mono: ['IBM Plex Mono', 'ui-monospace', 'monospace'],
       },
       typography: (theme) => ({
         DEFAULT: {

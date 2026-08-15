@@ -7,12 +7,10 @@ const allPosts = await getCollection('posts', ({ data }) => {
   return import.meta.env.PROD ? !data.draft : true;
 });
 
-// Sort by date (newest first)
 const sortedPosts = allPosts.sort((a, b) =>
   b.data.pubDate.getTime() - a.data.pubDate.getTime()
 );
 
-// Get all unique tags
 const allTags = allPosts.flatMap(post => post.data.tags);
 const tagCounts = allTags.reduce((acc, tag) => {
   acc[tag] = (acc[tag] || 0) + 1;
@@ -20,30 +18,28 @@ const tagCounts = allTags.reduce((acc, tag) => {
 }, {} as Record<string, number>);
 const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
 
-// Get all unique languages
 const languages = [...new Set(allPosts.map(post => post.data.language).filter(Boolean))];
 
-// Pagination
 const postsPerPage = 10;
 const currentPage = 1;
 const totalPages = Math.ceil(sortedPosts.length / postsPerPage);
 const posts = sortedPosts.slice(0, postsPerPage);
 ---
 
-<PageLayout title="Blog" description="All technical notes and articles">
+<PageLayout title="Notes" description="Technical notes on C++, CUDA, CMake, and computational geometry">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <!-- Header -->
     <div class="mb-12">
-      <h1 class="text-3xl sm:text-4xl font-bold text-notion-text dark:text-notion-text-dark mb-4">
-        All Notes
+      <h1 class="text-3xl sm:text-4xl font-semibold text-notion-text dark:text-notion-text-dark mb-4">
+        <span class="i18n-en">Notes</span>
+        <span class="i18n-zh">笔记</span>
       </h1>
       <p class="text-lg text-notion-text dark:text-notion-text-dark/70">
-        {sortedPosts.length} note{sortedPosts.length !== 1 ? 's' : ''} on programming, algorithms, and software engineering
+        <span class="i18n-en">{sortedPosts.length} notes on C++, CUDA, CMake, and computational geometry</span>
+        <span class="i18n-zh">{sortedPosts.length} 篇笔记，关于 C++、CUDA、CMake 与计算几何</span>
       </p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8">
-      <!-- Posts Grid -->
       <div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           {posts.map(post => (
@@ -51,7 +47,6 @@ const posts = sortedPosts.slice(0, postsPerPage);
           ))}
         </div>
 
-        <!-- Pagination -->
         {totalPages > 1 && (
           <div class="mt-12 flex items-center justify-center gap-2">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
@@ -70,13 +65,12 @@ const posts = sortedPosts.slice(0, postsPerPage);
         )}
       </div>
 
-      <!-- Sidebar -->
       <aside class="space-y-8">
-        {/* Languages */}
         {languages.length > 0 && (
           <div class="bg-notion-gray dark:bg-notion-gray-dark/50 rounded-lg p-6">
             <h2 class="text-lg font-semibold text-notion-text dark:text-notion-text-dark mb-4">
-              Languages
+              <span class="i18n-en">Languages</span>
+              <span class="i18n-zh">语言</span>
             </h2>
             <div class="space-y-2">
               {languages.map(language => (
@@ -94,11 +88,11 @@ const posts = sortedPosts.slice(0, postsPerPage);
           </div>
         )}
 
-        {/* Tags */}
         {sortedTags.length > 0 && (
           <div class="bg-notion-gray dark:bg-notion-gray-dark/50 rounded-lg p-6">
             <h2 class="text-lg font-semibold text-notion-text dark:text-notion-text-dark mb-4">
-              Tags
+              <span class="i18n-en">Tags</span>
+              <span class="i18n-zh">标签</span>
             </h2>
             <div class="flex flex-wrap gap-2">
               {sortedTags.map(([tag, count]) => (

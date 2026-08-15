@@ -18,68 +18,63 @@ const {
   noIndex = false,
 } = Astro.props;
 
-const fullTitle = title === siteConfig.title ? title : `${title} | ${siteConfig.title}`;
+const fullTitle = title === siteConfig.title ? `${siteConfig.author} · ${siteConfig.role}` : `${title} | ${siteConfig.author}`;
 const siteOrigin = siteConfig.siteOrigin;
 const siteUrl = siteConfig.siteUrl;
-// Use siteOrigin for canonical to avoid double base path (Astro.url.pathname already includes base)
 const canonical = canonicalUrl || `${siteOrigin}${Astro.url.pathname}`;
 const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`;
 ---
 
 <!doctype html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" data-lang="en" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <meta name="author" content={siteConfig.author} />
 
-    <!-- Canonical URL -->
     <link rel="canonical" href={canonical} />
 
-    <!-- Robots -->
     {noIndex && <meta name="robots" content="noindex, nofollow" />}
 
-    <!-- Open Graph -->
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImageUrl} />
-    <meta property="og:site_name" content={siteConfig.title} />
+    <meta property="og:site_name" content={siteConfig.author} />
 
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:site" content="@JoeCheungZzz" />
 
-    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    <!-- Theme Script (inline to prevent flash) -->
     <script is:inline>
       (function () {
-        const theme = localStorage.getItem('theme') ||
-          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        if (theme === 'dark') {
-          document.documentElement.classList.add('dark');
-        }
+        const theme = localStorage.getItem('theme') || 'dark';
+        if (theme === 'dark') document.documentElement.classList.add('dark');
+
+        var saved = localStorage.getItem('lang');
+        var lang = saved === 'zh' || saved === 'en'
+          ? saved
+          : (navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+        document.documentElement.lang = lang === 'zh' ? 'zh-Hans' : 'en';
+        document.documentElement.setAttribute('data-lang', lang);
       })();
     </script>
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
       rel="stylesheet"
     />
 
     <title>{fullTitle}</title>
-
-    <!-- RSS Feed -->
-    <link rel="alternate" type="application/rss+xml" title={siteConfig.title} href="/rss.xml" />
+    <link rel="alternate" type="application/rss+xml" title={siteConfig.author} href="/rss.xml" />
   </head>
   <body class="min-h-screen flex flex-col">
     <slot />

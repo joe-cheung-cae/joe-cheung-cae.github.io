@@ -2,92 +2,178 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import Card from '@/components/ui/Card.astro';
 import { getCollection } from 'astro:content';
+import { siteConfig } from '@/site.config';
+import { featuredProjects } from '@/data/projects';
 
 const allPosts = await getCollection('posts', ({ data }) => {
   return import.meta.env.PROD ? !data.draft : true;
 });
 
-// Sort by date (newest first)
-const sortedPosts = allPosts.sort((a, b) =>
-  b.data.pubDate.getTime() - a.data.pubDate.getTime()
+const sortedPosts = allPosts.sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
 );
 
-// Get featured posts
-const featuredPosts = sortedPosts.filter(post => post.data.featured).slice(0, 2);
-
-// Get latest posts (excluding featured)
-const latestPosts = sortedPosts.filter(post => !post.data.featured).slice(0, 6);
-
-// Get all unique languages
-const languages = [...new Set(allPosts.map(post => post.data.language).filter(Boolean))];
-
-// Get all unique tags
-const allTags = allPosts.flatMap(post => post.data.tags);
-const tagCounts = allTags.reduce((acc, tag) => {
-  acc[tag] = (acc[tag] || 0) + 1;
-  return acc;
-}, {} as Record<string, number>);
-const topTags = Object.entries(tagCounts)
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 8)
-  .map(([tag]) => tag);
+const featuredPosts = sortedPosts.filter((post) => post.data.featured).slice(0, 2);
+const latestPosts = sortedPosts.filter((post) => !post.data.featured).slice(0, 3);
 ---
 
 <PageLayout>
-  <!-- Hero Section -->
-  <section class="py-16 sm:py-24">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center max-w-3xl mx-auto">
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-notion-text dark:text-notion-text-dark mb-6">
-          Technical Notes for
-          <span class="text-notion-blue"> Developers</span>
-        </h1>
-        <p class="text-lg sm:text-xl text-notion-text dark:text-notion-text-dark/70 mb-8">
-          A collection of in-depth notes on algorithms, C++, CMake, CUDA, and software engineering.
-          Built for quick reference and deep learning.
-        </p>
-        <div class="flex flex-wrap justify-center gap-4">
-          <a
-            href="/blog"
-            class="inline-flex items-center px-6 py-3 rounded-lg bg-notion-blue text-white font-medium hover:bg-notion-blue/90 transition-colors"
-          >
-            Browse All Notes
-            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-            </svg>
-          </a>
-          <a
-            href="/about"
-            class="inline-flex items-center px-6 py-3 rounded-lg border border-notion-border dark:border-notion-border-dark text-notion-text dark:text-notion-text-dark font-medium hover:bg-notion-gray dark:hover:bg-notion-gray-dark transition-colors"
-          >
-            About This Site
-          </a>
-        </div>
+  <section class="relative overflow-hidden border-b border-notion-border dark:border-notion-border-dark">
+    <div class="hero-grid" aria-hidden="true"></div>
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 relative">
+      <p class="text-[11px] tracking-[0.22em] uppercase text-notion-blue font-semibold mb-5">
+        <span class="i18n-en">CAE · HPC · GPU Computing</span>
+        <span class="i18n-zh">计算力学 · 高性能计算 · GPU</span>
+      </p>
+      <h1 class="text-4xl sm:text-6xl font-semibold tracking-tight text-notion-text dark:text-notion-text-dark max-w-3xl text-balance">
+        {siteConfig.author}
+      </h1>
+      <p class="mt-3 text-xl sm:text-2xl text-notion-text/80 dark:text-notion-text-dark/75">
+        <span class="i18n-en">{siteConfig.role}</span>
+        <span class="i18n-zh">{siteConfig.roleZh}</span>
+      </p>
+      <p class="mt-6 max-w-2xl text-base sm:text-lg leading-relaxed text-notion-text/70 dark:text-notion-text-dark/65">
+        <span class="i18n-en">
+          I design GPU-first particle solvers for industrial CAE — SPH, DEM, and rigid-body
+          contact — plus the C++ / MPI / CUDA infrastructure they run on.
+        </span>
+        <span class="i18n-zh">
+          做工业 CAE 用的 GPU 粒子求解器：光滑粒子流体动力学、离散元与刚体接触，以及它们依赖的 C++ / MPI / CUDA 基础设施。
+        </span>
+      </p>
+      <div class="mt-9 flex flex-wrap gap-3">
+        <a
+          href="/projects"
+          class="inline-flex items-center justify-center min-h-11 px-5 rounded-md bg-notion-blue text-white text-sm font-medium hover:opacity-90 transition-opacity"
+        >
+          <span class="i18n-en">Selected work</span>
+          <span class="i18n-zh">精选项目</span>
+        </a>
+        <a
+          href="/blog"
+          class="inline-flex items-center justify-center min-h-11 px-5 rounded-md border border-notion-border dark:border-notion-border-dark text-sm font-medium text-notion-text dark:text-notion-text-dark hover:border-notion-blue transition-colors"
+        >
+          <span class="i18n-en">Technical notes</span>
+          <span class="i18n-zh">技术笔记</span>
+        </a>
+        <a
+          href={`mailto:${siteConfig.email}`}
+          class="inline-flex items-center justify-center min-h-11 px-5 rounded-md text-sm font-medium text-notion-text/80 dark:text-notion-text-dark/75 hover:text-notion-blue transition-colors"
+        >
+          {siteConfig.email}
+        </a>
       </div>
     </div>
   </section>
 
-  <!-- Start Here Section -->
+  <section class="py-16 sm:py-20">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-semibold text-notion-text dark:text-notion-text-dark mb-8">
+        <span class="i18n-en">Focus</span>
+        <span class="i18n-zh">方向</span>
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <article class="p-6 rounded-xl border border-notion-border dark:border-notion-border-dark bg-notion-bg dark:bg-notion-bg-dark">
+          <h3 class="text-lg font-semibold text-notion-text dark:text-notion-text-dark mb-2">
+            <span class="i18n-en">Particle methods</span>
+            <span class="i18n-zh">粒子方法</span>
+          </h3>
+          <p class="text-sm leading-relaxed text-notion-text/70 dark:text-notion-text-dark/65">
+            <span class="i18n-en">SPH, DEM, and rigid-body contact for industrial fluid–structure and granular cases.</span>
+            <span class="i18n-zh">SPH、DEM 与刚体接触，面向工业流固耦合与颗粒体系。</span>
+          </p>
+        </article>
+        <article class="p-6 rounded-xl border border-notion-border dark:border-notion-border-dark bg-notion-bg dark:bg-notion-bg-dark">
+          <h3 class="text-lg font-semibold text-notion-text dark:text-notion-text-dark mb-2">
+            <span class="i18n-en">GPU / HPC</span>
+            <span class="i18n-zh">GPU / 高性能计算</span>
+          </h3>
+          <p class="text-sm leading-relaxed text-notion-text/70 dark:text-notion-text-dark/65">
+            <span class="i18n-en">CUDA C++ kernels, occupancy, and solver-scale data layouts on NVIDIA GPUs.</span>
+            <span class="i18n-zh">CUDA C++ 核函数、占用率与求解器规模的数据布局。</span>
+          </p>
+        </article>
+        <article class="p-6 rounded-xl border border-notion-border dark:border-notion-border-dark bg-notion-bg dark:bg-notion-bg-dark">
+          <h3 class="text-lg font-semibold text-notion-text dark:text-notion-text-dark mb-2">
+            <span class="i18n-en">Solver infrastructure</span>
+            <span class="i18n-zh">求解器基础设施</span>
+          </h3>
+          <p class="text-sm leading-relaxed text-notion-text/70 dark:text-notion-text-dark/65">
+            <span class="i18n-en">CMake packages, MPI backends, expression decks, and offline CUDA builder images.</span>
+            <span class="i18n-zh">CMake 包、MPI 后端、表达式输入卡，以及离线 CUDA 构建镜像。</span>
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16 sm:py-20 bg-notion-gray dark:bg-notion-gray-dark/30">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-end justify-between gap-4 mb-8">
+        <div>
+          <h2 class="text-2xl font-semibold text-notion-text dark:text-notion-text-dark">
+            <span class="i18n-en">Selected work</span>
+            <span class="i18n-zh">精选项目</span>
+          </h2>
+          <p class="mt-1 text-sm text-notion-text/60 dark:text-notion-text-dark/55">
+            <span class="i18n-en">Public repositories only. Production solvers stay private.</span>
+            <span class="i18n-zh">仅列出公开仓库。生产求解器保持私有。</span>
+          </p>
+        </div>
+        <a href="/projects" class="hidden sm:inline text-sm font-medium text-notion-blue hover:underline">
+          <span class="i18n-en">All projects</span>
+          <span class="i18n-zh">全部项目</span>
+        </a>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {featuredProjects.map((project) => (
+          <a
+            href={project.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group block p-6 rounded-xl border border-notion-border dark:border-notion-border-dark bg-notion-bg dark:bg-notion-bg-dark hover:border-notion-blue transition-colors"
+          >
+            <div class="flex items-start justify-between gap-3 mb-3">
+              <h3 class="text-lg font-semibold text-notion-text dark:text-notion-text-dark group-hover:text-notion-blue transition-colors">
+                {project.name}
+              </h3>
+              <span class="text-xs font-mono text-notion-text/45 dark:text-notion-text-dark/40">↗</span>
+            </div>
+            <p class="text-sm leading-relaxed text-notion-text/70 dark:text-notion-text-dark/65 mb-4">
+              <span class="i18n-en">{project.blurbEn}</span>
+              <span class="i18n-zh">{project.blurbZh}</span>
+            </p>
+            <div class="flex flex-wrap gap-2">
+              {project.tags.map((tag) => (
+                <span class="px-2 py-0.5 rounded text-xs font-mono bg-notion-gray dark:bg-notion-gray-dark text-notion-text/70 dark:text-notion-text-dark/65">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
   {featuredPosts.length > 0 && (
-    <section class="py-12 bg-notion-gray dark:bg-notion-gray-dark/30">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section class="py-16 sm:py-20">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between mb-8">
           <div>
-            <h2 class="text-2xl font-bold text-notion-text dark:text-notion-text-dark">Start Here</h2>
-            <p class="text-notion-text dark:text-notion-text-dark/60 mt-1">Featured notes to get you started</p>
+            <h2 class="text-2xl font-semibold text-notion-text dark:text-notion-text-dark">Start Here</h2>
+            <p class="text-sm text-notion-text/60 dark:text-notion-text-dark/55 mt-1">
+              <span class="i18n-en">Featured notes</span>
+              <span class="i18n-zh">精选笔记</span>
+            </p>
           </div>
-          <a
-            href="/blog"
-            class="hidden sm:inline-flex items-center text-sm font-medium text-notion-blue hover:underline"
-          >
-            View all
-            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
+          <a href="/blog" class="hidden sm:inline text-sm font-medium text-notion-blue hover:underline">
+            <span class="i18n-en">View all</span>
+            <span class="i18n-zh">全部笔记</span>
           </a>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {featuredPosts.map(post => (
+          {featuredPosts.map((post) => (
             <Card post={post} featured />
           ))}
         </div>
@@ -95,64 +181,16 @@ const topTags = Object.entries(tagCounts)
     </section>
   )}
 
-  <!-- Latest Notes Section -->
-  <section class="py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <h2 class="text-2xl font-bold text-notion-text dark:text-notion-text-dark">Latest Notes</h2>
-          <p class="text-notion-text dark:text-notion-text-dark/60 mt-1">Recently added to the collection</p>
-        </div>
-        <a
-          href="/blog"
-          class="hidden sm:inline-flex items-center text-sm font-medium text-notion-blue hover:underline"
-        >
-          View all
-          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-          </svg>
-        </a>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {latestPosts.map(post => (
-          <Card post={post} />
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- Browse by Language -->
-  {languages.length > 0 && (
-    <section class="py-12 bg-notion-gray dark:bg-notion-gray-dark/30">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-2xl font-bold text-notion-text dark:text-notion-text-dark mb-6">Browse by Language</h2>
-        <div class="flex flex-wrap gap-3">
-          {languages.map(language => (
-            <a
-              href={`/languages/${language?.toLowerCase().replace(/\s+/g, '-')}`}
-              class="inline-flex items-center px-4 py-2 rounded-lg bg-notion-bg dark:bg-notion-bg-dark border border-notion-border dark:border-notion-border-dark text-notion-text dark:text-notion-text-dark hover:border-notion-blue dark:hover:border-notion-blue transition-colors"
-            >
-              {language}
-            </a>
-          ))}
-        </div>
-      </div>
-    </section>
-  )}
-
-  <!-- Popular Tags -->
-  {topTags.length > 0 && (
-    <section class="py-12">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-2xl font-bold text-notion-text dark:text-notion-text-dark mb-6">Popular Tags</h2>
-        <div class="flex flex-wrap gap-3">
-          {topTags.map(tag => (
-            <a
-              href={`/tags/${tag.toLowerCase().replace(/\s+/g, '-')}`}
-              class="inline-flex items-center px-4 py-2 rounded-full bg-notion-gray dark:bg-notion-gray-dark text-notion-text dark:text-notion-text-dark hover:bg-notion-border dark:hover:bg-notion-border-dark transition-colors"
-            >
-              #{tag}
-            </a>
+  {latestPosts.length > 0 && (
+    <section class="py-12 pb-20">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-semibold text-notion-text dark:text-notion-text-dark mb-8">
+          <span class="i18n-en">Latest notes</span>
+          <span class="i18n-zh">最近笔记</span>
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {latestPosts.map((post) => (
+            <Card post={post} />
           ))}
         </div>
       </div>

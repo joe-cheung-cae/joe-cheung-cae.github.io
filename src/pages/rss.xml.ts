@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import { siteConfig } from '@/site.config';
 import { getBaseUrl } from '@/utils/deployment';
 
-export async function GET(context: { site: string }) {
+export async function GET() {
   const posts = await getCollection('posts', ({ data }) => {
     return !data.draft;
   });
@@ -15,7 +15,7 @@ export async function GET(context: { site: string }) {
   const baseUrl = getBaseUrl() === '/' ? '' : getBaseUrl();
 
   return rss({
-    title: siteConfig.title,
+    title: `${siteConfig.author} · notes`,
     description: siteConfig.description,
     site: siteConfig.siteUrl,
     items: sortedPosts.map((post) => ({

@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'preact/hooks';
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const currentTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+    const currentTheme = savedTheme || 'dark';
     setTheme(currentTheme);
+    document.documentElement.classList.toggle('dark', currentTheme === 'dark');
   }, []);
 
   const toggleTheme = () => {
@@ -19,30 +19,15 @@ export default function ThemeToggle() {
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
   };
 
-  if (!mounted) {
-    return (
-      <button
-        type="button"
-        className="p-2 rounded-lg text-notion-text dark:text-notion-text-dark hover:bg-notion-gray dark:hover:bg-notion-gray-dark"
-        aria-label="Toggle theme"
-      >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="5" strokeWidth="2" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-        </svg>
-      </button>
-    );
-  }
-
   return (
     <button
       type="button"
       onClick={toggleTheme}
-      className="p-2 rounded-lg text-notion-text dark:text-notion-text-dark hover:bg-notion-gray dark:hover:bg-notion-gray-dark transition-colors"
+      className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-md text-notion-text dark:text-notion-text-dark hover:bg-notion-gray dark:hover:bg-notion-gray-dark transition-colors"
       aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
     >
-      {theme === 'light' ? (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {mounted && theme === 'light' ? (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -51,7 +36,7 @@ export default function ThemeToggle() {
           />
         </svg>
       ) : (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"

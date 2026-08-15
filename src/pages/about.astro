@@ -3,62 +3,88 @@ import PageLayout from '@/layouts/PageLayout.astro';
 import { siteConfig } from '@/site.config';
 ---
 
-<PageLayout title="About" description="About this technical notes blog">
-  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <h1 class="text-3xl sm:text-4xl font-bold text-notion-text dark:text-notion-text-dark mb-8">
-      About
+<PageLayout title="About" description="About Joe Cheung, CAE and HPC engineer">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+    <p class="text-[11px] tracking-[0.22em] uppercase text-notion-blue font-semibold mb-4">About</p>
+    <h1 class="text-3xl sm:text-4xl font-semibold text-notion-text dark:text-notion-text-dark mb-8">
+      {siteConfig.author}
     </h1>
 
     <div class="prose-custom">
-      <p class="text-lg text-notion-text dark:text-notion-text-dark/80 mb-6">
-        Welcome to {siteConfig.title} — a personal knowledge base for technical notes on programming,
-        algorithms, and software engineering.
+      <p class="i18n-en text-lg text-notion-text dark:text-notion-text-dark/80">
+        I am a CAE R&D engineer working on computational fluid dynamics, rigid-body
+        dynamics, and discrete element methods. The through-line is industrial
+        computational mechanics on GPU: solvers that have to be correct, fast, and
+        shippable.
+      </p>
+      <p class="i18n-zh text-lg text-notion-text dark:text-notion-text-dark/80">
+        我是做 CFD、刚体动力学与离散元方法的 CAE 研发工程师。主线是工业计算力学的 GPU 实现：求解器要正确、要快、要能交付。
       </p>
 
-      <h2>Why This Exists</h2>
-      <p>
-        I created this site to solve a problem: I was learning a lot but couldn't easily find
-        my notes when I needed them. Traditional note-taking apps were either too slow or
-        didn't support the technical content I wanted to capture.
-      </p>
-      <p>
-        This blog is built with a few key principles:
-      </p>
+      <h2>
+        <span class="i18n-en">What I work on</span>
+        <span class="i18n-zh">在做什么</span>
+      </h2>
       <ul>
-        <li><strong>Fast search</strong> — Find any note in seconds</li>
-        <li><strong>Tag-based organization</strong> — Browse by topic or language</li>
-        <li><strong>Code-friendly</strong> — Syntax highlighting for all major languages</li>
-        <li><strong>Dark mode</strong> — Easy on the eyes during late-night coding</li>
+        <li>
+          <span class="i18n-en"><strong>Particle solvers</strong> — SPH, DEM, and rigid-body contact for industrial cases.</span>
+          <span class="i18n-zh"><strong>粒子求解器</strong> — SPH、DEM 与刚体接触，面向工业工况。</span>
+        </li>
+        <li>
+          <span class="i18n-en"><strong>GPU computing</strong> — CUDA C++, kernel design, and solver-scale data movement.</span>
+          <span class="i18n-zh"><strong>GPU 计算</strong> — CUDA C++、核函数设计与求解器规模的数据搬运。</span>
+        </li>
+        <li>
+          <span class="i18n-en"><strong>HPC plumbing</strong> — MPI runtime dispatch, CMake packages, offline CUDA builder images.</span>
+          <span class="i18n-zh"><strong>HPC 基础设施</strong> — MPI 运行时分发、CMake 包、离线 CUDA 构建镜像。</span>
+        </li>
       </ul>
 
-      <h2>Topics Covered</h2>
-      <ul>
-        <li><strong>C++</strong> — Modern C++ features, performance optimization, memory management</li>
-        <li><strong>Algorithms</strong> — Computational geometry, graph algorithms, data structures</li>
-        <li><strong>Build Systems</strong> — CMake, build optimization, CI/CD</li>
-        <li><strong>GPU Computing</strong> — CUDA, parallel algorithms, performance tuning</li>
-        <li><strong>Best Practices</strong> — Software design, testing, productivity</li>
-      </ul>
+      <h2>
+        <span class="i18n-en">Public vs private</span>
+        <span class="i18n-zh">公开与私有</span>
+      </h2>
+      <p class="i18n-en">
+        Production solvers and client studies stay private. The public repos are the
+        reusable pieces around them: viewers, expression runtimes, MPI dispatch, and
+        GPU build tooling.
+      </p>
+      <p class="i18n-zh">
+        生产求解器与客户算例保持私有。公开仓库是周边可复用件：后处理查看器、表达式运行时、MPI 分发层、GPU 构建工具。
+      </p>
 
-      <h2>Tech Stack</h2>
-      <p>
-        This site is built with modern web technologies:
+      <h2>
+        <span class="i18n-en">Stack</span>
+        <span class="i18n-zh">技术栈</span>
+      </h2>
+      <p>C++17/20 · CUDA · SPH · DEM · CMake · MPI · Python</p>
+
+      <h2>
+        <span class="i18n-en">This site</span>
+        <span class="i18n-zh">本站</span>
+      </h2>
+      <p class="i18n-en">
+        Personal landing plus a small notes archive on algorithms, modern C++, CMake,
+        and CUDA. Built with Astro, Tailwind, MDX, and MiniSearch.
+      </p>
+      <p class="i18n-zh">
+        个人主页，附带算法、现代 C++、CMake 与 CUDA 笔记。用 Astro、Tailwind、MDX 和 MiniSearch 搭建。
+      </p>
+
+      <h2>
+        <span class="i18n-en">Contact</span>
+        <span class="i18n-zh">联系</span>
+      </h2>
+      <p class="i18n-en">
+        Open to CAE, HPC, and GPU solver work.
+      </p>
+      <p class="i18n-zh">
+        欢迎计算力学、高性能计算与 GPU 求解器方向的合作。
       </p>
       <ul>
-        <li><a href="https://astro.build">Astro</a> — Static site generator</li>
-        <li><a href="https://tailwindcss.com">Tailwind CSS</a> — Styling</li>
-        <li><a href="https://mdxjs.com">MDX</a> — Markdown with components</li>
-        <li><a href="https://lucaong.github.io/minisearch/">MiniSearch</a> — Client-side search</li>
-        <li><a href="https://preactjs.com">Preact</a> — Interactive islands</li>
-      </ul>
-
-      <h2>Get in Touch</h2>
-      <p>
-        Have a question or suggestion? Reach out via:
-      </p>
-      <ul>
-        <li>GitHub: <a href={siteConfig.social.github} target="_blank" rel="noopener noreferrer">{siteConfig.social.github}</a></li>
         <li>Email: <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a></li>
+        <li>GitHub: <a href={siteConfig.social.github}>{siteConfig.social.github}</a></li>
+        <li>X: <a href={siteConfig.social.x}>@JoeCheungZzz</a></li>
       </ul>
     </div>
   </div>
