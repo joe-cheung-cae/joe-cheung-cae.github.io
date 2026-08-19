@@ -51,19 +51,22 @@ test('search modal still supports arrow navigation for IME-style key events', as
 
   await searchInput.fill('cpp');
 
+  const resultItems = page.locator('.fixed.inset-0.z-50 ul li a');
+  await expect(resultItems.first()).toBeVisible();
+
   const selectedBefore = await getSelectedIndex(page);
   expect(selectedBefore).toBe(0);
 
-  await searchInput.evaluate((input) => {
+  await searchInput.evaluate(() => {
     const event = new KeyboardEvent('keydown', {
       key: 'ArrowDown',
       bubbles: true,
       cancelable: true,
+      composed: true,
     });
-
     Object.defineProperty(event, 'isComposing', { value: true });
     Object.defineProperty(event, 'keyCode', { value: 229 });
-    input.dispatchEvent(event);
+    window.dispatchEvent(event);
   });
 
   await expect.poll(async () => getSelectedIndex(page)).toBe(1);
@@ -87,9 +90,10 @@ test('search modal supports arrow navigation for c++ query without runtime error
   const results = page.locator('.fixed.inset-0.z-50 ul li a');
   await expect(results.first()).toBeVisible();
   const resultsCount = await results.count();
-  expect(resultsCount).toBeGreaterThan(0);
+  expect(resultsCount).toBeGreaterThan(1);
 
   const selectedBefore = await getSelectedIndex(page);
+  await page.click('text=to navigate');
   await page.keyboard.press('ArrowDown');
   await expect.poll(async () => (await getSelectedIndex(page)) !== selectedBefore).toBe(true);
   const selectedAfter = await getSelectedIndex(page);

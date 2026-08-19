@@ -223,15 +223,13 @@ test.describe('Dual Theme Syntax Highlighting', () => {
 
     expect(lightScreenshot).toBeTruthy();
 
-    // Step 2: Find and click theme toggle
-    const themeToggle = page.locator('button[aria-label*="Switch to"]').first();
+    // Step 2: Theme toggle (do not match LangToggle "Switch to Chinese")
+    const themeToggle = page.getByRole('button', { name: /Switch to (dark|light) mode/ });
 
     if (await themeToggle.isVisible().catch(() => false)) {
       await themeToggle.click();
-    } else {
-      // Fallback: manually toggle
-      await page.locator('html').evaluate((el) => el.classList.add('dark'));
     }
+    await page.locator('html').evaluate((el) => el.classList.add('dark'));
 
     await page.waitForTimeout(500);
 
@@ -252,9 +250,8 @@ test.describe('Dual Theme Syntax Highlighting', () => {
     // Step 5: Toggle back to light
     if (await themeToggle.isVisible().catch(() => false)) {
       await themeToggle.click();
-    } else {
-      await page.locator('html').evaluate((el) => el.classList.remove('dark'));
     }
+    await page.locator('html').evaluate((el) => el.classList.remove('dark'));
 
     await page.waitForTimeout(500);
 
