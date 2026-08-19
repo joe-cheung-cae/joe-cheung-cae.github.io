@@ -34,6 +34,7 @@ function validConfig() {
       signature: { en: joeCheung.role, zh: joeCheung.roleZh },
       links: [
         { href: '/blog', textEn: 'Blog', textZh: '笔记' },
+        { href: '/gallery', textEn: 'Gallery', textZh: '相册' },
         { href: '/about', textEn: 'About', textZh: '关于' },
         { href: `mailto:${joeCheung.email}`, textEn: 'Email', textZh: '邮箱' },
         { href: joeCheung.github, textEn: 'GitHub', textZh: 'GitHub' },
@@ -61,10 +62,20 @@ describe('createHomepageConfig', () => {
     assert.equal('avatar' in config.main, false);
     assert.equal('supportAuthor' in config, false);
     assert.equal('supportAuthor' in config.intro, false);
+    assert.equal(
+      config.main.links.some((link) => link.href === '/gallery'),
+      true
+    );
+    assert.deepEqual(config.main.links[1], {
+      href: '/gallery',
+      textEn: 'Gallery',
+      textZh: '相册',
+    });
     assert.deepEqual(
       config.main.links.map((link) => link.href),
-      ['/blog', '/about', `mailto:${joeCheung.email}`, joeCheung.github]
+      ['/blog', '/gallery', '/about', `mailto:${joeCheung.email}`, joeCheung.github]
     );
+    assert.equal(/simon/i.test(JSON.stringify(config)), false);
   });
 });
 
@@ -113,6 +124,7 @@ describe('parseHomepageConfig', () => {
             ...validConfig().main,
             links: [
               { href: '/projects', textEn: 'Projects', textZh: '项目' },
+              { href: '/gallery', textEn: 'Gallery', textZh: '相册' },
               { href: '/about', textEn: 'About', textZh: '关于' },
               { href: `mailto:${joeCheung.email}`, textEn: 'Email', textZh: '邮箱' },
               { href: joeCheung.github, textEn: 'GitHub', textZh: 'GitHub' },
@@ -120,6 +132,45 @@ describe('parseHomepageConfig', () => {
           },
         }),
       /main.links must include \/blog/
+    );
+  });
+
+  test('rejects main links that omit /gallery', () => {
+    assert.throws(
+      () =>
+        parseHomepageConfig({
+          ...validConfig(),
+          main: {
+            ...validConfig().main,
+            links: [
+              { href: '/blog', textEn: 'Blog', textZh: '笔记' },
+              { href: '/about', textEn: 'About', textZh: '关于' },
+              { href: `mailto:${joeCheung.email}`, textEn: 'Email', textZh: '邮箱' },
+              { href: joeCheung.github, textEn: 'GitHub', textZh: 'GitHub' },
+            ],
+          },
+        }),
+      /main.links must include \/gallery/
+    );
+  });
+
+  test('accepts /album as the gallery href', () => {
+    const parsed = parseHomepageConfig({
+      ...validConfig(),
+      main: {
+        ...validConfig().main,
+        links: [
+          { href: '/blog', textEn: 'Blog', textZh: '笔记' },
+          { href: '/album', textEn: 'Gallery', textZh: '相册' },
+          { href: '/about', textEn: 'About', textZh: '关于' },
+          { href: `mailto:${joeCheung.email}`, textEn: 'Email', textZh: '邮箱' },
+          { href: joeCheung.github, textEn: 'GitHub', textZh: 'GitHub' },
+        ],
+      },
+    });
+    assert.equal(
+      parsed.main.links.some((link) => link.href === '/album'),
+      true
     );
   });
 });

@@ -1,0 +1,39 @@
+---
+import ThemeToggle from '../ThemeToggle';
+import LangToggle from '../LangToggle';
+import { siteConfig } from '@/site.config';
+
+interface Props {
+  headerTitle?: string;
+}
+
+const { headerTitle = siteConfig.author } = Astro.props;
+---
+
+<header id="header" class="top-header">
+  <button
+    type="button"
+    id="menu-toggle"
+    aria-label="Toggle menu"
+    aria-controls="notes-menu"
+    aria-expanded="false"
+  >
+    <span class="notes-hamburger" aria-hidden="true"></span>
+  </button>
+
+  <button type="button" id="search-trigger" aria-label="Open search">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+    </svg>
+    <kbd class="hidden md:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono bg-notion-gray dark:bg-notion-gray-dark rounded">
+      ⌘K
+    </kbd>
+  </button>
+
+  <p class="header-title">{headerTitle}</p>
+
+  <div class="notes-header-tools">
+    <LangToggle client:only="preact" transition:persist="lang-toggle" />
+    <ThemeToggle client:only="preact" transition:persist="theme-toggle" />
+  </div>
+</header>

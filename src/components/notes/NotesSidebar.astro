@@ -1,0 +1,94 @@
+---
+import { siteConfig } from '@/site.config';
+import { isNotesNavActive } from '@/lib/notes-drawer';
+
+interface Props {
+  postCount: number;
+  tagCount: number;
+  albumCount: number;
+}
+
+const { postCount, tagCount, albumCount } = Astro.props;
+const pathname = Astro.url.pathname;
+
+const navItems = [
+  { href: '/', labelEn: 'Home', labelZh: '主页' },
+  { href: '/blog', labelEn: 'Notes', labelZh: '笔记' },
+  { href: '/tags', labelEn: 'Tags', labelZh: '标签' },
+  { href: '/languages', labelEn: 'Languages', labelZh: '语言' },
+  { href: '/gallery', labelEn: 'Gallery', labelZh: '相册' },
+  { href: '/projects', labelEn: 'Projects', labelZh: '项目' },
+  { href: '/about', labelEn: 'About', labelZh: '关于' },
+] as const;
+---
+
+<aside id="notes-menu" aria-label="Site">
+  <div class="notes-menu-inner">
+    <div class="brand-wrap" id="brand-wrap">
+      <a href="/" class="notes-brand">
+        <span class="notes-monogram">{siteConfig.shortName}</span>
+        <span id="name">{siteConfig.author}</span>
+      </a>
+
+      <ul class="social-links">
+      <li>
+        <a href={`mailto:${siteConfig.email}`} aria-label="Email">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16v12H4z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 7l8 6 8-6"></path>
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a href={siteConfig.social.github} aria-label="GitHub" target="_blank" rel="noopener noreferrer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.52 2.87 8.35 6.84 9.71.5.1.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.36 1.12 2.94.86.09-.67.35-1.12.63-1.38-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.31.1-2.73 0 0 .84-.27 2.75 1.05a9.2 9.2 0 0 1 5 0c1.91-1.32 2.75-1.05 2.75-1.05.55 1.42.2 2.47.1 2.73.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.8-4.58 5.06.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.04 10.04 0 0 0 22 12.26C22 6.58 17.52 2 12 2z"></path>
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a href={siteConfig.social.x} aria-label="X" target="_blank" rel="noopener noreferrer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M18.9 2H22l-6.8 7.77L23.2 22h-6.6l-5.17-6.76L5.4 22H2.28l7.27-8.3L.8 2h6.76l4.67 6.2L18.9 2zm-1.16 18h1.83L6.35 3.9H4.4L17.74 20z"></path>
+          </svg>
+        </a>
+      </li>
+    </ul>
+
+    <ul class="statistics">
+      <li>
+        <span class="count">{postCount}</span>
+        <span class="label i18n-en">notes</span>
+        <span class="label i18n-zh">笔记</span>
+      </li>
+      <li>
+        <span class="count">{tagCount}</span>
+        <span class="label i18n-en">tags</span>
+        <span class="label i18n-zh">标签</span>
+      </li>
+      <li>
+        <span class="count">{albumCount}</span>
+        <span class="label i18n-en">album</span>
+        <span class="label i18n-zh">相册</span>
+      </li>
+    </ul>
+    </div>
+
+    <nav aria-label="Primary">
+      <ul class="nav">
+        {navItems.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              class:list={[{ 'is-active': isNotesNavActive(pathname, item.href) }]}
+              aria-current={isNotesNavActive(pathname, item.href) ? 'page' : undefined}
+            >
+              <span class="i18n-en">{item.labelEn}</span>
+              <span class="i18n-zh">{item.labelZh}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+</aside>

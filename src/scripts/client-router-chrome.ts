@@ -1,9 +1,22 @@
 import { isTransitionBeforeSwapEvent } from 'astro:transitions/client';
 import { applyHtmlChromeState, readHtmlChromeState } from '@/lib/html-chrome';
+import { notesMenuIsOpen, nextNotesMenuClassName } from '@/lib/notes-drawer';
 import { isSearchHotkey } from '@/lib/search-shortcut';
 
 let installed = false;
 let chromeAbort: AbortController | undefined;
+
+function setNotesMenuOpen(open: boolean): void {
+  const menu = document.getElementById('notes-menu');
+  const toggle = document.getElementById('menu-toggle');
+  const backdrop = document.getElementById('notes-menu-backdrop');
+  if (!menu) return;
+
+  menu.className = nextNotesMenuClassName(menu.className, open);
+  toggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
+  backdrop?.classList.toggle('is-open', open);
+  document.body.classList.toggle('notes-menu-lock', open);
+}
 
 export function bindPageChrome(signal: AbortSignal): void {
   const openSearch = () => {
@@ -22,12 +35,25 @@ export function bindPageChrome(signal: AbortSignal): void {
     { signal }
   );
 
-  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-  const mobileMenu = document.getElementById('mobile-menu');
-  mobileMenuBtn?.addEventListener(
+  const menuToggle = document.getElementById('menu-toggle');
+  const notesMenu = document.getElementById('notes-menu');
+  const backdrop = document.getElementById('notes-menu-backdrop');
+
+  if (notesMenu) setNotesMenuOpen(false);
+
+  menuToggle?.addEventListener(
     'click',
     () => {
-      mobileMenu?.classList.toggle('hidden');
+      if (!notesMenu) return;
+      setNotesMenuOpen(!notesMenuIsOpen(notesMenu.className));
+    },
+    { signal }
+  );
+
+  backdrop?.addEventListener(
+    'click',
+    () => {
+      setNotesMenuOpen(false);
     },
     { signal }
   );

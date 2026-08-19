@@ -1,6 +1,7 @@
 ---
 import PostLayout from '@/layouts/PostLayout.astro';
-import { getCollection, getEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
+import { countWords } from '@/lib/word-count';
 import { calculateReadingTime } from '@/utils/readingTime';
 
 export async function getStaticPaths() {
@@ -12,17 +13,12 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
+const content = post.body || '';
+const wordCount = countWords(content);
+const readingTime = post.data.readingTime ?? calculateReadingTime(content);
 
-// Calculate reading time if not set
-if (!post.data.readingTime) {
-  const content = post.body || '';
-  post.data.readingTime = calculateReadingTime(content);
-}
-
-// Render content
 const { Content, headings } = await post.render();
 
-// Get all posts for navigation
 const allPosts = await getCollection('posts', ({ data }) => {
   return import.meta.env.PROD ? !data.draft : true;
 });
@@ -35,16 +31,13 @@ const currentIndex = sortedPosts.findIndex(p => p.slug === post.slug);
 const prevPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : undefined;
 const nextPost = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentIndex + 1] : undefined;
 
-// Get related posts (same tags or language)
 const relatedPosts = sortedPosts
   .filter(p => p.slug !== post.slug)
   .map(p => {
     let score = 0;
-    // Same language
     if (p.data.language && p.data.language === post.data.language) {
       score += 3;
     }
-    // Shared tags
     const sharedTags = p.data.tags.filter(tag => post.data.tags.includes(tag));
     score += sharedTags.length;
     return { post: p, score };
@@ -61,6 +54,8 @@ const relatedPosts = sortedPosts
   prevPost={prevPost}
   nextPost={nextPost}
   relatedPosts={relatedPosts}
+  readingTime={readingTime}
+  wordCount={wordCount}
 >
   <Content />
 </PostLayout>

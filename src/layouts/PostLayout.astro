@@ -1,9 +1,8 @@
 ---
-import PageLayout from './PageLayout.astro';
+import NotesLayout from './NotesLayout.astro';
 import TOC from '@/components/navigation/TOC.astro';
 import PrevNext from '@/components/navigation/PrevNext.astro';
 import RelatedPosts from '@/components/RelatedPosts.astro';
-import TagChip from '@/components/ui/TagChip.astro';
 import { formatDate } from '@/utils/formatDate';
 import { formatReadingTime } from '@/utils/readingTime';
 import type { CollectionEntry } from 'astro:content';
@@ -14,87 +13,72 @@ interface Props {
   prevPost?: CollectionEntry<'posts'>;
   nextPost?: CollectionEntry<'posts'>;
   relatedPosts: CollectionEntry<'posts'>[];
+  readingTime: number;
+  wordCount: number;
 }
 
-const { post, headings, prevPost, nextPost, relatedPosts } = Astro.props;
-const { title, description, pubDate, updatedDate, tags, language, readingTime } = post.data;
-
+const { post, headings, prevPost, nextPost, relatedPosts, readingTime, wordCount } = Astro.props;
+const { title, description, pubDate, updatedDate, tags, language } = post.data;
 const showTOC = headings.length > 0;
+const baseUrl = import.meta.env.BASE_URL || '/';
 ---
 
-<PageLayout
+<NotesLayout
   title={title}
   description={description}
   ogImage={post.data.ogImage}
   canonicalUrl={post.data.canonicalUrl}
+  banner="post"
+  headerTitle={title}
 >
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8">
-      <!-- Main Content -->
-      <article class="min-w-0">
-        <!-- Post Header -->
-        <header class="mb-8">
-          {language && (
-            <div class="mb-4">
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-notion-blue-light dark:bg-blue-900/30 text-notion-blue">
-                {language}
-              </span>
-            </div>
-          )}
+  <article class="post-article">
+    <div class="post-card">
+      <h1 class="post-card-title">{title}</h1>
 
-          <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-notion-text dark:text-notion-text-dark mb-4">
-            {title}
-          </h1>
-
-          <p class="text-lg text-notion-text dark:text-notion-text-dark/80 mb-4">
-            {description}
-          </p>
-
-          <div class="flex flex-wrap items-center gap-4 text-sm text-notion-text dark:text-notion-text-dark/70">
-            <time datetime={pubDate.toISOString()}>
-              {formatDate(pubDate)}
-            </time>
-            {updatedDate && (
-              <span>
-                (Updated: <time datetime={updatedDate.toISOString()}>{formatDate(updatedDate)}</time>)
-              </span>
-            )}
-            {readingTime && (
-              <span>· {formatReadingTime(readingTime)}</span>
-            )}
-          </div>
-
-          {tags.length > 0 && (
-            <div class="flex flex-wrap gap-2 mt-4">
-              {tags.map((tag) => (
-                <TagChip tag={tag} />
-              ))}
-            </div>
-          )}
-        </header>
-
-        <!-- Post Content -->
-        <div class="prose-custom">
-          <slot />
-        </div>
-
-        <!-- Post Footer -->
-        <footer class="mt-12 pt-8 border-t border-notion-border dark:border-notion-border-dark">
-          <PrevNext prev={prevPost} next={nextPost} />
-        </footer>
-
-        <!-- Related Posts -->
-        {relatedPosts.length > 0 && (
-          <RelatedPosts posts={relatedPosts} />
+      <p class="post-card-meta">
+        <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+        {updatedDate && (
+          <span class="post-updated">
+            <span class="i18n-en">Updated</span>
+            <span class="i18n-zh">更新</span>
+            <time datetime={updatedDate.toISOString()}>{formatDate(updatedDate)}</time>
+          </span>
         )}
-      </article>
+        <span class="reading-time">{formatReadingTime(readingTime)}</span>
+        <span class="word-count">
+          <span class="i18n-en">{wordCount.toLocaleString('en-US')} words</span>
+          <span class="i18n-zh">{wordCount.toLocaleString('zh-Hans')} 词</span>
+        </span>
+        {language && <span class="post-language">{language}</span>}
+      </p>
 
-      <!-- Sidebar -->
-      <aside class="hidden lg:block">
-        <div class="sticky top-24">
-          {showTOC && <TOC headings={headings} />}
-        </div>
-      </aside>
+      {tags.length > 0 && (
+        <ul class="article-tag-list">
+          {tags.map((tag) => (
+            <li>
+              <a href={`${baseUrl}tags/${tag.toLowerCase().replace(/\s+/g, '-')}`}>#{tag}</a>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {showTOC && (
+        <aside class="post-toc">
+          <TOC headings={headings} />
+        </aside>
+      )}
+
+      <div class="prose-custom">
+        <slot />
+      </div>
     </div>
-  </div>
-</PageLayout>
+
+    <footer class="post-nav">
+      <PrevNext prev={prevPost} next={nextPost} />
+    </footer>
+
+    {relatedPosts.length > 0 && (
+      <RelatedPosts posts={relatedPosts} />
+    )}
+  </article>
+</NotesLayout>

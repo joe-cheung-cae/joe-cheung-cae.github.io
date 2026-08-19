@@ -1,0 +1,83 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import NotesSidebar from '@/components/notes/NotesSidebar.astro';
+import NotesTopHeader from '@/components/notes/NotesTopHeader.astro';
+import NotesContentHeader from '@/components/notes/NotesContentHeader.astro';
+import Footer from '@/components/navigation/Footer.astro';
+import SearchModal from '@/components/search/SearchModal';
+import { getCollection } from 'astro:content';
+import { albums } from '@/data/album';
+import '@/styles/notes.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  canonicalUrl?: string;
+  noIndex?: boolean;
+  headerTitle?: string;
+  banner?: 'index' | 'post' | 'tags' | 'quiet';
+  bannerTitleEn?: string;
+  bannerTitleZh?: string;
+  bannerSubtitleEn?: string;
+  bannerSubtitleZh?: string;
+}
+
+const {
+  title,
+  description,
+  ogImage,
+  canonicalUrl,
+  noIndex,
+  headerTitle,
+  banner = 'index',
+  bannerTitleEn,
+  bannerTitleZh,
+  bannerSubtitleEn,
+  bannerSubtitleZh,
+} = Astro.props;
+
+const allPosts = await getCollection('posts', ({ data }) => {
+  return import.meta.env.PROD ? !data.draft : true;
+});
+
+const postCount = allPosts.length;
+const tagCount = new Set(allPosts.flatMap((post) => post.data.tags)).size;
+const albumCount = albums.length;
+
+const searchIndex = allPosts.map((post) => ({
+  id: post.slug,
+  title: post.data.title,
+  description: post.data.description,
+  content: post.body?.slice(0, 2000) || '',
+  slug: post.slug,
+  tags: post.data.tags,
+  language: post.data.language,
+}));
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  ogImage={ogImage}
+  canonicalUrl={canonicalUrl}
+  noIndex={noIndex}
+>
+  <NotesSidebar postCount={postCount} tagCount={tagCount} albumCount={albumCount} />
+  <div class="notes-menu-backdrop" id="notes-menu-backdrop"></div>
+  <div class="notes-wrap" id="main">
+    <NotesTopHeader headerTitle={headerTitle} />
+    <NotesContentHeader
+      banner={banner}
+      bannerTitleEn={bannerTitleEn}
+      bannerTitleZh={bannerTitleZh}
+      bannerSubtitleEn={bannerSubtitleEn}
+      bannerSubtitleZh={bannerSubtitleZh}
+    />
+    <div class="notes-body">
+      <slot />
+    </div>
+    <Footer />
+  </div>
+  <SearchModal client:idle searchIndex={searchIndex} transition:persist="search-modal" />
+</BaseLayout>

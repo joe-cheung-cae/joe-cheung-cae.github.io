@@ -1,3 +1,5 @@
+import { countWords } from '../lib/word-count';
+
 /**
  * Calculate reading time for a given text
  * @param content - The text content to analyze
@@ -5,25 +7,12 @@
  * @returns Reading time in minutes
  */
 export function calculateReadingTime(content: string, wordsPerMinute = 200): number {
-  if (!content || content.trim().length === 0) {
+  const wordCount = countWords(content);
+  if (wordCount === 0) {
     return 1;
   }
 
-  // Remove code blocks, HTML tags, and markdown syntax for accurate word count
-  const cleanContent = content
-    .replace(/```[\s\S]*?```/g, '') // Remove code blocks
-    .replace(/`[^`]*`/g, '') // Remove inline code
-    .replace(/<[^>]*>/g, '') // Remove HTML tags
-    .replace(/!\[.*?\]\(.*?\)/g, '') // Remove images
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1') // Replace links with just text
-    .replace(/[#*_~`]/g, '') // Remove markdown formatting
-    .replace(/\s+/g, ' ') // Normalize whitespace
-    .trim();
-
-  const wordCount = cleanContent.split(/\s+/).filter(word => word.length > 0).length;
-  const readingTime = Math.ceil(wordCount / wordsPerMinute);
-
-  return Math.max(readingTime, 1);
+  return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
 }
 
 /**

@@ -1,0 +1,124 @@
+---
+export type NotesBannerKind = 'index' | 'post' | 'tags' | 'quiet';
+
+interface Props {
+  banner?: NotesBannerKind;
+  bannerTitleEn?: string;
+  bannerTitleZh?: string;
+  bannerSubtitleEn?: string;
+  bannerSubtitleZh?: string;
+}
+
+const {
+  banner = 'index',
+  bannerTitleEn,
+  bannerTitleZh,
+  bannerSubtitleEn,
+  bannerSubtitleZh,
+} = Astro.props;
+
+const showCopy = banner !== 'post' && banner !== 'quiet';
+const hasTitle = Boolean(bannerTitleEn || bannerTitleZh);
+const hasSubtitle = Boolean(bannerSubtitleEn || bannerSubtitleZh);
+const headerClass =
+  banner === 'post'
+    ? 'content-header post-header'
+    : banner === 'tags'
+      ? 'content-header tags-header'
+      : banner === 'quiet'
+        ? 'content-header quiet-header'
+        : 'content-header index-header';
+---
+
+<header class={headerClass}>
+  <div class="content-header-grid" aria-hidden="true"></div>
+  {banner !== 'quiet' && (
+    <canvas class="flickering-grid-canvas" aria-hidden="true"></canvas>
+  )}
+  {showCopy && (hasTitle || hasSubtitle) && (
+    <div class="content-header-inner" id="inner-header">
+      {hasTitle && (
+        <h1 class="title">
+          {bannerTitleEn && <span class="i18n-en">{bannerTitleEn}</span>}
+          {bannerTitleZh && <span class="i18n-zh">{bannerTitleZh}</span>}
+        </h1>
+      )}
+      {hasSubtitle && (
+        <p class="subtitle">
+          {bannerSubtitleEn && <span class="i18n-en">{bannerSubtitleEn}</span>}
+          {bannerSubtitleZh && <span class="i18n-zh">{bannerSubtitleZh}</span>}
+        </p>
+      )}
+    </div>
+  )}
+</header>
+
+<script>
+  const REDUCE = '(prefers-reduced-motion: reduce)';
+  const handles = new WeakMap<HTMLCanvasElement, number>();
+
+  function prefersReducedMotion(): boolean {
+    return window.matchMedia(REDUCE).matches;
+  }
+
+  function paint(canvas: HTMLCanvasElement, flicker: boolean): void {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const rect = canvas.getBoundingClientRect();
+    const width = Math.max(1, Math.floor(rect.width));
+    const height = Math.max(1, Math.floor(rect.height));
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const cell = 5;
+    const gap = 13;
+    const accent = getComputedStyle(canvas).getPropertyValue('--accent-color').trim() || '#9a7048';
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = accent;
+
+    for (let y = 0; y < height; y += cell + gap) {
+      for (let x = 0; x < width; x += cell + gap) {
+        ctx.globalAlpha = flicker ? 0.05 + Math.random() * 0.22 : 0.12;
+        ctx.fillRect(x, y, cell, cell);
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function stop(canvas: HTMLCanvasElement): void {
+    const raf = handles.get(canvas);
+    if (raf) cancelAnimationFrame(raf);
+    handles.delete(canvas);
+    delete canvas.dataset.gridBound;
+  }
+
+  function start(canvas: HTMLCanvasElement): void {
+    if (canvas.dataset.gridBound === '1') return;
+    canvas.dataset.gridBound = '1';
+    paint(canvas, false);
+    if (prefersReducedMotion()) return;
+
+    let tick = 0;
+    const loop = () => {
+      tick += 1;
+      if (tick % 28 === 0) paint(canvas, true);
+      handles.set(canvas, requestAnimationFrame(loop));
+    };
+    handles.set(canvas, requestAnimationFrame(loop));
+  }
+
+  function bindAll(): void {
+    document.querySelectorAll<HTMLCanvasElement>('canvas.flickering-grid-canvas').forEach(start);
+  }
+
+  function unbindAll(): void {
+    document.querySelectorAll<HTMLCanvasElement>('canvas.flickering-grid-canvas').forEach(stop);
+  }
+
+  document.addEventListener('astro:before-swap', unbindAll);
+  document.addEventListener('astro:page-load', bindAll);
+  bindAll();
+</script>

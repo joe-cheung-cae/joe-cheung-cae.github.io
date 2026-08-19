@@ -1,0 +1,131 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { coverStops, hashString } from '@/lib/note-cover';
+import { countWords } from '@/lib/word-count';
+import { formatDate } from '@/utils/formatDate';
+import { calculateReadingTime, formatReadingTime } from '@/utils/readingTime';
+
+interface Props {
+  post: CollectionEntry<'posts'>;
+}
+
+const { post } = Astro.props;
+const { title, description, pubDate, tags } = post.data;
+const body = post.body ?? '';
+const wordCount = countWords(body);
+const readingTime = post.data.readingTime ?? calculateReadingTime(body);
+const stops = coverStops(post.slug);
+const coverHash = hashString(post.slug);
+const baseUrl = import.meta.env.BASE_URL || '/';
+const href = `${baseUrl}blog/${post.slug}`;
+---
+
+<article class="article-card">
+  <div class="post-cover">
+    <div
+      class="canvas-cover"
+      data-post-id={post.slug}
+      data-cover-start={stops.start}
+      data-cover-mid={stops.mid}
+      data-cover-end={stops.end}
+      data-cover-hash={String(coverHash)}
+      style={`--cover-start: ${stops.start}; --cover-mid: ${stops.mid}; --cover-end: ${stops.end};`}
+    >
+      <canvas class="note-cover-canvas" aria-hidden="true"></canvas>
+    </div>
+  </div>
+
+  <h3 class="post-title">
+    <a href={href}>{title}</a>
+  </h3>
+
+  <p class="post-meta">
+    <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+    <span class="reading-time">{formatReadingTime(readingTime)}</span>
+    <span class="word-count">
+      <span class="i18n-en">{wordCount.toLocaleString('en-US')} words</span>
+      <span class="i18n-zh">{wordCount.toLocaleString('zh-Hans')} 词</span>
+    </span>
+  </p>
+
+  <div class="post-content">
+    <p class="post-excerpt">{description}</p>
+  </div>
+
+  <a class="post-more" href={href}>
+    <span class="i18n-en">Read more</span>
+    <span class="i18n-zh">阅读全文</span>
+  </a>
+
+  {tags.length > 0 && (
+    <footer class="post-footer post-tags">
+      <ul class="article-tag-list">
+        {tags.map((tag) => (
+          <li class="article-tag-list-item">
+            <a class="article-tag-list-link" href={`${baseUrl}tags/${tag.toLowerCase().replace(/\s+/g, '-')}`}>#{tag}</a>
+          </li>
+        ))}
+      </ul>
+    </footer>
+  )}
+</article>
+
+<script>
+  const REDUCE = '(prefers-reduced-motion: reduce)';
+
+  function prefersReducedMotion(): boolean {
+    return window.matchMedia(REDUCE).matches;
+  }
+
+  function paintCover(cover: HTMLElement): void {
+    const canvas = cover.querySelector<HTMLCanvasElement>('canvas.note-cover-canvas');
+    if (!canvas) return;
+
+    if (prefersReducedMotion()) {
+      canvas.style.display = 'none';
+      return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const rect = cover.getBoundingClientRect();
+    const width = Math.max(1, Math.floor(rect.width));
+    const height = Math.max(1, Math.floor(rect.height));
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    canvas.style.display = 'block';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const start = cover.dataset.coverStart || '#9a7048';
+    const mid = cover.dataset.coverMid || '#c4a574';
+    const end = cover.dataset.coverEnd || '#1c1915';
+    const hash = Number(cover.dataset.coverHash || '0') >>> 0;
+
+    const gradient = ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, start);
+    gradient.addColorStop(0.52, mid);
+    gradient.addColorStop(1, end);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    for (let i = 0; i < 4; i += 1) {
+      const x = (((hash >>> (i * 5)) & 255) / 255) * width;
+      const y = (((hash >>> (i * 3 + 8)) & 255) / 255) * height;
+      const radius = 30 + ((hash >>> (i * 4 + 2)) % 52);
+      const orb = ctx.createRadialGradient(x, y, 0, x, y, radius);
+      orb.addColorStop(0, i % 2 === 0 ? mid : start);
+      orb.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = orb;
+      ctx.fillRect(0, 0, width, height);
+    }
+  }
+
+  function bindCovers(): void {
+    document.querySelectorAll<HTMLElement>('.canvas-cover[data-post-id]').forEach(paintCover);
+  }
+
+  document.addEventListener('astro:page-load', bindCovers);
+  bindCovers();
+</script>
