@@ -5,8 +5,8 @@
 | Field | Value |
 | --- | --- |
 | Branch | `refactor` (from clean `main` `51f2ef8`; 评审 `10a1805`) |
-| Current phase | **测试** (done) |
-| Next phase | **上线** |
+| Current phase | **上线** (done) |
+| Next phase | — |
 | Site identity | Joe Cheung · CAE & HPC Engineer (not SimonAKing) |
 | Workflow | `.grok/workflows/homepage-refactor.rhai` (**exists**) |
 | Breakdown | `docs/simonaking-refactor-breakdown.md` (done) |
@@ -14,7 +14,7 @@
 | Thinking roles | grok-46-high (需求拆解 / 评审 / 开发), grok-46-low (归档), grok-46-medium (测试 / 上线) |
 | UI this phase | Two-screen `/` shipped: config identity, PavelDoGreat fluid, 1100ms enter, ClientRouter. |
 
-Phases done: **需求拆解**, **评审**, **归档**, **开发/config**, **开发/fluid**, **开发/homepage**, **开发/transitions**, **测试**. Next: **上线**.
+Phases done: **需求拆解**, **评审**, **归档**, **开发/config**, **开发/fluid**, **开发/homepage**, **开发/transitions**, **测试**, **上线**. Next: none.
 
 ---
 
@@ -24,7 +24,7 @@ Phases done: **需求拆解**, **评审**, **归档**, **开发/config**, **开�
 | --- | --- | --- |
 | `design-upgrade` / `origin/design-upgrade` | **9 commits ahead** (CSS-only `.hero-grid`, ClientRouter, phases 1–6 of the superseded GROK_BUILD_PLAN contract) | **Not merged.** Visual contract superseded by SimonAKing WebGL fluid. |
 | `stash@{0}` (`On design-upgrade`) | Dirty leftover files: `playwright.config.ts`, `src/components/search/SearchModal.tsx` | **Not applied.** Message: `wip: design-upgrade dirty files leftover, not mixed into refactor`. |
-| `origin/gh-pages` | Deploy history (`26f30a6` latest) | **Not merged.** Production publish branch for `npm run deploy:github`. |
+| `origin/gh-pages` | Deploy history (`c99e320` latest; was `26f30a6`) | **Not merged.** Production publish branch for `npm run deploy:github`. |
 | `main` / `origin/main` | At `51f2ef8` | Root of `refactor`. |
 
 `design-upgrade` SHAs (do not land here): `10bb216` `833e77f` `9eb99fa` `e3ca6f6` `727b66c` `e7191de` `402c2c1` `99b4393` `1bda8c4`.
@@ -301,3 +301,15 @@ Playwright on built `dist` + dual `npm run build`. Joe Cheung identity only.
 Covered: `homepage-simonaking` (6), `card-link-structure` (1), `search-keyboard-shortcuts` (3), `dual-theme-syntax-highlighting` (7). Identity assertions read `homepageConfig`, not a reimplemented string.
 
 Parent also re-ran `npm run build` twice (both exit 0, 36 pages, `dist/index.html` 50695 bytes). Playwright 1.58.2. Probe: `/` identity Joe Cheung, canvas 1280×800, zero page errors; second WebGL context readback is null (context already owned).
+
+### 9. 上线 — done
+
+Published the refactored site via the existing GitHub Pages path. Did **not** merge `refactor` → `main`. Did **not** use Docker / GitLab.
+
+**What changed this phase**
+
+- Ran `npm run deploy:github` (`build:github` + `touch dist/.nojekyll` + `gh-pages -d dist --dotfiles`). Command exit 0; `gh-pages` printed `Published`.
+- `origin/gh-pages` moved `26f30a6` → `c99e320` (`Updates`, 2026-08-19T03:27:00Z). Tree includes `.nojekyll`, `index.html` (50695 bytes), `/blog/` `/projects/` `/about/` `/search/`.
+- GitHub Pages (`source.branch=gh-pages`, `path=/`) build `2026-08-19T03:27:03Z` → **built** at `03:27:21Z` (`error: null`).
+- Live probe `https://joe-cheung-cae.github.io/`: `/` `/blog/` `/projects/` `/about/` `/search/` `.nojekyll` all HTTP 200. Home is Joe Cheung · CAE & HPC Engineer two-screen (`homepage-intro`, `data-fluid-background`, FluidBackground). No SimonAKing / `supportAuthor`.
+- Stayed on `refactor` (`5755dc5`). Did **not** checkout, merge, or rebase. Did **not** mix `design-upgrade` / `stash@{0}`. Local `dist/` is the same `build:github` output.
