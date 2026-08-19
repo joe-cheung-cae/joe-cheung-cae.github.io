@@ -1,3 +1,27 @@
+@font-face {
+  font-family: 'Comic Code';
+  src: local('Comic Code'), local('ComicCode');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+.homepage-notes,
+#featured-notes,
+#latest-notes,
+.homepage-notes h2,
+.homepage-notes h3,
+.homepage-notes p,
+.homepage-notes a,
+.homepage-notes .i18n-en,
+#featured-notes .i18n-en,
+#latest-notes .i18n-en,
+.homepage-notes .i18n-zh,
+#featured-notes .i18n-zh,
+#latest-notes .i18n-zh {
+  font-family: var(--homepage-notes-font-family, 'Comic Code', ui-monospace, monospace, system-ui, sans-serif);
+}
+
 .homepage-root {
   position: relative;
   width: 100%;
