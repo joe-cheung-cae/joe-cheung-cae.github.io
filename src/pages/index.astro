@@ -9,6 +9,7 @@ import IntroMotion from '@/components/homepage/IntroMotion';
 import { getCollection } from 'astro:content';
 import { homepageConfig } from '@/homepage.config';
 import { featuredProjects } from '@/data/projects';
+import { homepageNotesFontFaceCss, homepageNotesInlineStyle } from '@/lib/homepage-notes-font';
 import '@/styles/homepage.css';
 
 const backgroundEnabled = homepageConfig.intro.background;
@@ -55,6 +56,7 @@ const shapePathTo =
       </style>
     </noscript>
 
+    <Fragment set:html={`<style data-homepage-notes-font>${homepageNotesFontFaceCss()}</style>`} />
     <HomepageChrome />
     {backgroundEnabled && <FluidBackground client:load backgroundEnabled />}
     <IntroMotion client:load />
@@ -193,7 +195,11 @@ const shapePathTo =
       </section>
 
       {featuredPosts.length > 0 && (
-        <section id="featured-notes" class="py-16 sm:py-20">
+        <section
+          id="featured-notes"
+          class="homepage-notes py-16 sm:py-20"
+          style={homepageNotesInlineStyle()}
+        >
           <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between mb-8">
               <div>
@@ -218,7 +224,11 @@ const shapePathTo =
       )}
 
       {latestPosts.length > 0 && (
-        <section class="py-12 pb-20">
+        <section
+          id="latest-notes"
+          class="homepage-notes py-12 pb-20"
+          style={homepageNotesInlineStyle()}
+        >
           <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="text-2xl font-semibold text-notion-text dark:text-notion-text-dark mb-8">
               <span class="i18n-en">Latest notes</span>
