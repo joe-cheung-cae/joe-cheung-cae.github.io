@@ -46,6 +46,10 @@ export const homepageConfigSchema = z
     const hrefs = config.main.links.map((link) => link.href);
     const required = [
       { ok: hrefs.includes('/blog'), message: 'main.links must include /blog' },
+      {
+        ok: hrefs.some((href) => href === '/gallery' || href === '/album'),
+        message: 'main.links must include /gallery',
+      },
       { ok: hrefs.includes('/about'), message: 'main.links must include /about' },
       { ok: hrefs.some((href) => href.startsWith('mailto:')), message: 'main.links must include mailto' },
       { ok: hrefs.some((href) => href.includes('github')), message: 'main.links must include github' },
@@ -113,6 +117,7 @@ export function createHomepageConfig(identity: HomepageIdentity): HomepageConfig
       },
       links: [
         { href: '/blog', textEn: 'Blog', textZh: '笔记' },
+        { href: '/gallery', textEn: 'Gallery', textZh: '相册' },
         { href: '/about', textEn: 'About', textZh: '关于' },
         { href: `mailto:${identity.email}`, textEn: 'Email', textZh: '邮箱' },
         { href: identity.github, textEn: 'GitHub', textZh: 'GitHub' },

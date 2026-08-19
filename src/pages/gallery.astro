@@ -1,0 +1,46 @@
+---
+import NotesLayout from '@/layouts/NotesLayout.astro';
+import { albums } from '@/data/album';
+import { albumEmptyCopy, formatAlbumCount, isAlbumEmpty } from '@/lib/album';
+
+const empty = isAlbumEmpty(albums);
+const count = formatAlbumCount(albums.length);
+const emptyCopy = albumEmptyCopy();
+---
+
+<NotesLayout
+  title="Album"
+  description="Photo album of CAE and HPC snapshots"
+  banner="index"
+  bannerTitleEn="Album"
+  bannerTitleZh="相册"
+  bannerSubtitleEn={count.en}
+  bannerSubtitleZh={count.zh}
+>
+  <div id="album-page">
+    {empty ? (
+      <div class="album-empty">
+        <p class="i18n-en">{emptyCopy.en}</p>
+        <p class="i18n-zh">{emptyCopy.zh}</p>
+      </div>
+    ) : (
+      <ul class="album-masonry">
+        {albums.map((item) => (
+          <li>
+            {item.href ? (
+              <a href={item.href}>
+                <img src={item.src} alt={item.altEn} loading="lazy" />
+              </a>
+            ) : (
+              <img src={item.src} alt={item.altEn} loading="lazy" />
+            )}
+            <p class="album-alt">
+              <span class="i18n-en">{item.captionEn ?? item.altEn}</span>
+              <span class="i18n-zh">{item.captionZh ?? item.altZh}</span>
+            </p>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</NotesLayout>

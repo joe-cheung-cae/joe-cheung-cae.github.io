@@ -1,0 +1,13 @@
+---
+import NotesSidebar from './NotesSidebar.astro';
+
+interface Props {
+  postCount: number;
+  tagCount: number;
+  albumCount: number;
+}
+
+const { postCount, tagCount, albumCount } = Astro.props;
+---
+
+<NotesSidebar postCount={postCount} tagCount={tagCount} albumCount={albumCount} />

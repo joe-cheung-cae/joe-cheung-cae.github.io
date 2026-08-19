@@ -1,7 +1,8 @@
 ---
-import PageLayout from '@/layouts/PageLayout.astro';
-import Card from '@/components/ui/Card.astro';
+import NotesLayout from '@/layouts/NotesLayout.astro';
+import NoteCard from '@/components/notes/NoteCard.astro';
 import { getCollection } from 'astro:content';
+import { siteConfig } from '@/site.config';
 
 const allPosts = await getCollection('posts', ({ data }) => {
   return import.meta.env.PROD ? !data.draft : true;
@@ -11,103 +12,24 @@ const sortedPosts = allPosts.sort((a, b) =>
   b.data.pubDate.getTime() - a.data.pubDate.getTime()
 );
 
-const allTags = allPosts.flatMap(post => post.data.tags);
-const tagCounts = allTags.reduce((acc, tag) => {
-  acc[tag] = (acc[tag] || 0) + 1;
-  return acc;
-}, {} as Record<string, number>);
-const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
-
-const languages = [...new Set(allPosts.map(post => post.data.language).filter(Boolean))];
-
-const postsPerPage = 10;
-const currentPage = 1;
-const totalPages = Math.ceil(sortedPosts.length / postsPerPage);
-const posts = sortedPosts.slice(0, postsPerPage);
+const pageSize = siteConfig.pagination.postsPerPage;
+const posts = sortedPosts;
 ---
 
-<PageLayout title="Notes" description="Technical notes on C++, CUDA, CMake, and computational geometry">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <div class="mb-12">
-      <h1 class="text-3xl sm:text-4xl font-semibold text-notion-text dark:text-notion-text-dark mb-4">
-        <span class="i18n-en">Notes</span>
-        <span class="i18n-zh">笔记</span>
-      </h1>
-      <p class="text-lg text-notion-text dark:text-notion-text-dark/70">
-        <span class="i18n-en">{sortedPosts.length} notes on C++, CUDA, CMake, and computational geometry</span>
-        <span class="i18n-zh">{sortedPosts.length} 篇笔记，关于 C++、CUDA、CMake 与计算几何</span>
-      </p>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8">
-      <div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {posts.map(post => (
-            <Card post={post} />
-          ))}
-        </div>
-
-        {totalPages > 1 && (
-          <div class="mt-12 flex items-center justify-center gap-2">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <a
-                href={page === 1 ? '/blog' : `/blog/page/${page}`}
-                class={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  page === currentPage
-                    ? 'bg-notion-blue text-white'
-                    : 'bg-notion-gray dark:bg-notion-gray-dark text-notion-text dark:text-notion-text-dark hover:bg-notion-border dark:hover:bg-notion-border-dark'
-                }`}
-              >
-                {page}
-              </a>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <aside class="space-y-8">
-        {languages.length > 0 && (
-          <div class="bg-notion-gray dark:bg-notion-gray-dark/50 rounded-lg p-6">
-            <h2 class="text-lg font-semibold text-notion-text dark:text-notion-text-dark mb-4">
-              <span class="i18n-en">Languages</span>
-              <span class="i18n-zh">语言</span>
-            </h2>
-            <div class="space-y-2">
-              {languages.map(language => (
-                <a
-                  href={`/languages/${language?.toLowerCase().replace(/\s+/g, '-')}`}
-                  class="flex items-center justify-between py-2 text-sm text-notion-text dark:text-notion-text-dark/70 hover:text-notion-blue transition-colors"
-                >
-                  <span>{language}</span>
-                  <span class="text-notion-text dark:text-notion-text-dark/50">
-                    {allPosts.filter(p => p.data.language === language).length}
-                  </span>
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {sortedTags.length > 0 && (
-          <div class="bg-notion-gray dark:bg-notion-gray-dark/50 rounded-lg p-6">
-            <h2 class="text-lg font-semibold text-notion-text dark:text-notion-text-dark mb-4">
-              <span class="i18n-en">Tags</span>
-              <span class="i18n-zh">标签</span>
-            </h2>
-            <div class="flex flex-wrap gap-2">
-              {sortedTags.map(([tag, count]) => (
-                <a
-                  href={`/tags/${tag.toLowerCase().replace(/\s+/g, '-')}`}
-                  class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-notion-bg dark:bg-notion-bg-dark text-notion-text dark:text-notion-text-dark hover:bg-notion-border dark:hover:bg-notion-border-dark transition-colors"
-                >
-                  #{tag}
-                  <span class="text-notion-text dark:text-notion-text-dark/50">({count})</span>
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
-      </aside>
-    </div>
-  </div>
-</PageLayout>
+<NotesLayout
+  title="Notes"
+  description="Technical notes on C++, CUDA, CMake, and computational geometry"
+  banner="index"
+  bannerTitleEn="Notes"
+  bannerTitleZh="笔记"
+  bannerSubtitleEn={`${sortedPosts.length} notes on C++, CUDA, CMake, and computational geometry`}
+  bannerSubtitleZh={`${sortedPosts.length} 篇笔记，关于 C++、CUDA、CMake 与计算几何`}
+>
+  <ul class="post-list" data-page-size={pageSize}>
+    {posts.map((post) => (
+      <li>
+        <NoteCard post={post} />
+      </li>
+    ))}
+  </ul>
+</NotesLayout>

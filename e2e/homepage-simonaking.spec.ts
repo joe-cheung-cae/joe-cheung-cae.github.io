@@ -132,6 +132,8 @@ test.describe('homepage 390px', () => {
     await expect(cardNav.getByRole('link', { name: 'About' })).toBeVisible();
     await expect(cardNav.getByRole('link', { name: 'Email' })).toBeVisible();
     await expect(cardNav.getByRole('link', { name: 'GitHub' })).toBeVisible();
+    await expect(cardNav.locator('a[href="/gallery"]')).toBeVisible();
+    await expect(cardNav.getByRole('link', { name: /Gallery|相册/ })).toBeVisible();
     await expect(page.locator('button[aria-label*="menu" i], button[aria-label*="hamburger" i]')).toHaveCount(
       0
     );

@@ -1,0 +1,22 @@
+---
+import NotesContentHeader from './NotesContentHeader.astro';
+import type { NotesBannerKind } from './NotesContentHeader.astro';
+
+interface Props {
+  banner?: NotesBannerKind;
+  bannerTitleEn?: string;
+  bannerTitleZh?: string;
+  bannerSubtitleEn?: string;
+  bannerSubtitleZh?: string;
+}
+
+const { banner, bannerTitleEn, bannerTitleZh, bannerSubtitleEn, bannerSubtitleZh } = Astro.props;
+---
+
+<NotesContentHeader
+  banner={banner}
+  bannerTitleEn={bannerTitleEn}
+  bannerTitleZh={bannerTitleZh}
+  bannerSubtitleEn={bannerSubtitleEn}
+  bannerSubtitleZh={bannerSubtitleZh}
+/>

@@ -1,5 +1,5 @@
 ---
-import PageLayout from '@/layouts/PageLayout.astro';
+import NotesLayout from '@/layouts/NotesLayout.astro';
 import { getCollection } from 'astro:content';
 
 const allPosts = await getCollection('posts', ({ data }) => {
@@ -18,18 +18,16 @@ const languageCounts = allPosts.reduce((acc, post) => {
 const sortedLanguages = Object.entries(languageCounts).sort((a, b) => b[1] - a[1]);
 ---
 
-<PageLayout title="Languages" description="Browse notes by programming language">
+<NotesLayout
+  title="Languages"
+  description="Browse notes by programming language"
+  banner="index"
+  bannerTitleEn="Languages"
+  bannerTitleZh="语言"
+  bannerSubtitleEn="Notes organized by programming language or technology"
+  bannerSubtitleZh="按编程语言或技术浏览笔记"
+>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <!-- Header -->
-    <div class="mb-12">
-      <h1 class="text-3xl sm:text-4xl font-bold text-notion-text dark:text-notion-text-dark mb-4">
-        Languages
-      </h1>
-      <p class="text-lg text-notion-text dark:text-notion-text-dark/70">
-        Notes organized by programming language or technology
-      </p>
-    </div>
-
     <!-- Language Cards -->
     {sortedLanguages.length > 0 ? (
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -79,4 +77,4 @@ const sortedLanguages = Object.entries(languageCounts).sort((a, b) => b[1] - a[1
       </div>
     )}
   </div>
-</PageLayout>
+</NotesLayout>
