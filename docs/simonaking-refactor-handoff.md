@@ -1,18 +1,22 @@
 # SimonAKing homepage refactor — handoff
 
-Status document. Each serial phase updates this file, then the parent commits.
+**Frozen agreed plan** (归档). 开发 implements this only. No new design.
 
 | Field | Value |
 | --- | --- |
-| Branch | `refactor` at `18f18a7` (from clean `main` `51f2ef8`) |
-| Current phase | **评审 — done** |
-| Next phase | 归档 |
+| Branch | `refactor` (from clean `main` `51f2ef8`; 评审 `10a1805`) |
+| Current phase | **归档 — done** |
+| Next phase | **开发** (config → fluid → homepage → transitions) |
 | Site identity | Joe Cheung · CAE & HPC Engineer (not SimonAKing) |
 | Workflow | `.grok/workflows/homepage-refactor.rhai` (**exists**) |
-| Breakdown | `docs/simonaking-refactor-breakdown.md` |
-| Review | `docs/simonaking-refactor-review.md` (**PASS WITH REQUIRED EDITS**) |
+| Breakdown | `docs/simonaking-refactor-breakdown.md` (done) |
+| Review | `docs/simonaking-refactor-review.md` (**PASS WITH REQUIRED EDITS**, done) |
 | Thinking roles | grok-46-high (需求拆解 / 评审 / 开发), grok-46-low (归档), grok-46-medium (测试 / 上线) |
-| UI this phase | **None.** Review only. |
+| UI this phase | **None.** Archive only. |
+
+Phases done: **需求拆解**, **评审**, **归档**. Do not start UI until 开发.
+
+---
 
 ## Leftover branches (not mixed into `refactor`)
 
@@ -25,6 +29,175 @@ Status document. Each serial phase updates this file, then the parent commits.
 
 `design-upgrade` SHAs (do not land here): `10bb216` `833e77f` `9eb99fa` `e3ca6f6` `727b66c` `e7191de` `402c2c1` `99b4393` `1bda8c4`.
 
+Do **not** port `e2e/reduced-motion-hero.spec.ts`. `GROK_BUILD_PLAN.md` / `docs/Grok-Build-Upgrade-Plan.md` are historical, not this contract.
+
+---
+
+## Agreed config (`src/homepage.config.ts`)
+
+Reuse `siteConfig` for identity. Zod-validate only if a parse helper is added.
+
+```ts
+homepageConfig = {
+  head: {
+    title: 'Joe Cheung',
+    description: siteConfig.description,
+    favicon: '/favicon.svg',
+  },
+  intro: {
+    title: 'Joe Cheung',
+    subtitle: { en: siteConfig.role, zh: siteConfig.roleZh },
+    enter: { en: 'enter', zh: '进入' },
+    background: true, // default ON
+  },
+  main: {
+    name: 'Joe Cheung',
+    signature: { en: siteConfig.role, zh: siteConfig.roleZh },
+    // avatar omitted by default
+    links: [
+      { href: '/blog', textEn: 'Blog', textZh: '笔记' },
+      { href: '/about', textEn: 'About', textZh: '关于' },
+      { href: `mailto:${siteConfig.email}`, textEn: 'Email', textZh: '邮箱' },
+      { href: siteConfig.social.github, textEn: 'GitHub', textZh: 'GitHub' },
+    ],
+  },
+}
+```
+
+**Forbidden:** `supportAuthor`, Simon title/subtitle/signature/email/github/avatar, `assets/avatar.jpg`, GitHub-corner, `log.min.js`. Avatar field **unset**. Favicon `/favicon.svg`. New strings are `i18n-en` / `i18n-zh`. Inner title/OG/footer stay on `siteConfig`.
+
+---
+
+## Fluid on/off
+
+`src/lib/fluid-control.ts`:
+
+```ts
+shouldStartFluid({ backgroundEnabled, reducedMotion })
+  === backgroundEnabled && !reducedMotion
+```
+
+| Condition | `canvas#background` | Sim |
+| --- | --- | --- |
+| `intro.background === true` AND motion allowed | Present on homepage intro | `startFluid(canvas)` |
+| `intro.background === false` | Absent | Do not import/start |
+| `prefers-reduced-motion: reduce` | Absent | Do not start even if config on |
+| Inner routes | Absent | Do not load the sim module |
+
+- Vendor PavelDoGreat as `src/scripts/webgl-fluid.js` (prefer **`.js`**), MIT / Copyright (c) 2017 Pavel Dobryakov header.
+- Convert the IIFE so **import is inert**. Export `startFluid(canvas)` / `stopFluid()`.
+- Homepage-only. Never import from `BaseLayout` or inner routes.
+- Wrapper `data-fluid-background=on|off` reflects the **decision**, not GPU success. If WebGL fails, still leave the node when `shouldStartFluid` is true.
+- `stopFluid()` on intro→main complete, `pagehide`, `astro:before-swap`.
+- **Unit-test** both false branches of `shouldStartFluid`.
+- Compile-time `intro.background === false` is **not** a single-`dist` Playwright case. E2E “off” = `prefers-reduced-motion: reduce`.
+
+---
+
+## Intro / main chrome (no forks)
+
+**First paint of `/`:** exactly one `#search-trigger` + mounted `SearchModal` + Lang/Theme toggles. Do **not** update search specs to click enter first. Do not ship two `#search-trigger` ids (`SearchTrigger.astro` + Header).
+
+**Featured notes:** Keep Start Here (`Card.astro` `article` → one non-empty `a`) on `/` in the DOM (`#featured-notes` recommended). Heading accessible name stays **`Start Here`** (do not hide that h2 when `data-lang=zh`). Default: both screens in the DOM. 测试 strengthens `card-link-structure` to attached region + `article a` count ≥ 1 + no empty anchors.
+
+**Main:** identity card (name, signature, Blog / About / Email / GitHub). Keep selected work (`featuredProjects`) + latest notes. **Drop** Focus cards. `/projects` on the card is not required if Header after enter + selected-work “all projects” remain.
+
+**390px:** Intro shows name + enter. After enter (and immediately under reduced-motion), name/signature + Blog/About/Email/GitHub visible **without** the hamburger. Header `md:flex`-hidden nav is OK.
+
+IBM Plex. Dark fluid intro OK. Bronze accent may remain. No Comic Sans.
+
+---
+
+## Transition behavior
+
+- Homepage wrapper (not `<html>`): `data-page-transition=intro|main|busy`.
+- Triggers: enter click, wheel down (`deltaY > 0`), swipe-up. Same one-shot `loadAll`. Arrow hover optional.
+- Motion allowed: intro `translateY(-200vh)` + optional SVG path morph, **~1100ms**, then `main`.
+- One-shot: ignore further enter/scroll/swipe after `busy`/`main`.
+- Reduced motion: skip morph; jump to `main`; **do not start fluid**.
+- WAAPI `translateY` required. Path-`d` interpolation is not a WAAPI given — skip path morph **or** npm/vendored anime.js (no jsDelivr).
+- `ClientRouter` re-added cleanly in `BaseLayout` in 开发/transitions (not via `design-upgrade`). Header search rebind on `astro:page-load` (AbortController). `SearchModal` `open-search` stays.
+- **No** `GridAnimation` / `#gridCanvas`.
+
+---
+
+## Files to touch
+
+### Add (开发)
+
+| File | Why |
+| --- | --- |
+| `src/homepage.config.ts` | Encapsulated head/intro/main (Joe Cheung) |
+| `src/lib/fluid-control.ts` | Pure `shouldStartFluid` + types |
+| `src/lib/page-transition.ts` | Pure intro/main/busy + reduced-motion skip |
+| `src/scripts/webgl-fluid.js` | Vendored PavelDoGreat, MIT header, inert import, `startFluid`/`stopFluid` |
+| Homepage island e.g. `src/components/homepage/IntroMotion.tsx` or a `<script>` | Bind enter/wheel/swipe, data attrs, start/stop fluid |
+| Optional `src/styles/homepage.css` | Intro/main/shape (or a section in `global.css`) |
+
+### Add (测试, not 开发 UI)
+
+| File | Why |
+| --- | --- |
+| `e2e/homepage-simonaking.spec.ts` | New Playwright contracts |
+| `package.json` script `test:e2e` | `"test:e2e": "playwright test"` |
+
+### Edit
+
+| File | Why |
+| --- | --- |
+| `src/pages/index.astro` | Two-screen homepage; drop CSS-only `.hero-grid` as background |
+| `src/site.config.ts` | Wire/re-export if needed; do not rename Joe Cheung |
+| `src/layouts/BaseLayout.astro` | `ClientRouter`; keep IBM Plex + `data-lang` |
+| `src/layouts/PageLayout.astro` | Homepage may use `BaseLayout` directly so intro is full-bleed |
+| `src/components/navigation/Header.astro` | Compact intro chrome; persist after enter; rebind search |
+| `src/styles/global.css` | Homepage motion / reduced-motion |
+| `src/components/search/SearchModal.tsx` | Only if ClientRouter requires a rebind (likely fine) |
+| `e2e/card-link-structure.spec.ts` | 测试: attach + count ≥ 1 |
+| `docs/simonaking-refactor-handoff.md` | Later phases update status |
+
+### Do not touch (semantics)
+
+- `src/content/posts/*.mdx` bodies
+- `src/data/projects.ts` project records
+- `design-upgrade` / `stash@{0}` / `gh-pages`
+- Simon avatar / `supportAuthor` / Comic Sans
+- Docker / GitLab as the 上线 path
+- Vue / Pug / Gulp
+
+---
+
+## E2E / dual build / 上线 contracts
+
+Playwright serves **built** `dist` on `http://localhost:4321` (`npx serve dist -p 4321`). Not `astro dev`.
+
+1. `/` shows Joe Cheung and role (`CAE & HPC Engineer` or zh pair when `data-lang=zh`).
+2. Motion allowed + default config: `canvas#background` node exists; wrapper `data-fluid-background=on`.
+3. Reduced-motion: canvas **absent**, `data-fluid-background=off`; no long `busy`; lands on `main`.
+4. Enter and/or wheel: `data-page-transition` `intro → busy → main`, or intro leaves the viewport.
+5. 390px: identity + card links visible after enter; critical controls have non-empty names/text.
+6. `card-link-structure`: Start Here region attached, `article a` ≥ 1, no empty anchors.
+7. Search + theme specs stay green (`#search-trigger` / theme on first paint of `/`; dual-theme hits `/blog/cmake-modern-targets`).
+8. Do **not** assert compile-time `background: false` in one `dist`.
+
+**测试-only env:** if Playwright cannot reach `:4321`, add a localhost `NO_PROXY` bypass in `playwright.config.ts`. Do not apply `stash@{0}`.
+
+**Dual `npm run build`:** both exit 0; non-empty `dist/index.html` + `dist/blog/` `dist/projects/` `dist/about/` `dist/search/`. Stability check, not a substitute for `build:github`.
+
+**上线:** `npm run deploy:github` → `build:github && touch dist/.nojekyll && gh-pages -d dist --dotfiles`. Not Docker, not GitLab CI, not merge `refactor` → `main`. If deploy cannot run, record the real blocker.
+
+Inner routes stay: `/` `/blog` `/blog/[slug]` `/projects` `/about` `/search` `/languages` `/tags` `/rss.xml` `404`.
+
+---
+
+## Next 开发 steps (workflow order)
+
+1. **config** — `homepage.config.ts` + `shouldStartFluid` + transition helpers + unit tests for both fluid false branches.
+2. **fluid** — vendor `webgl-fluid.js` (inert import); homepage-only start/stop; `data-fluid-background`.
+3. **homepage** — two-screen `index.astro`; intro chrome; Start Here + selected work + latest notes; drop Focus + `.hero-grid` background.
+4. **transitions** — 1100ms / reduced-motion skip; `ClientRouter` + search rebind.
+
+---
+
 ## Phase log
 
 ### 0. Branch setup — done
@@ -33,58 +206,18 @@ Checked out `main`, listed branches, created `refactor` at the same commit as `m
 
 ### 1. 需求拆解 — done
 
-Mapped SimonAKing/HomePage defining mechanics onto this Astro homepage (config, PavelDoGreat fluid + reduced-motion, two-screen intro/main, 1100ms SVG/translateY transition, reachable inner routes). Confirmed `.grok/workflows/homepage-refactor.rhai` exists. Wrote `docs/simonaking-refactor-breakdown.md`. No homepage UI implemented.
-
-**What changed this phase**
-
-- Added/expanded `docs/simonaking-refactor-breakdown.md` (leftovers, Joe Cheung config shape, fluid start/stop, intro/main, transition, files, Playwright, dual build, Pages 上线).
-- Updated this handoff: 需求拆解 = done; leftovers table includes the 9 unmerged commits, `gh-pages`, and stash dirty files.
-- Did **not** edit `src/pages/index.astro` or any runtime UI.
-- Did **not** merge `design-upgrade` or apply `stash@{0}`.
+Mapped SimonAKing/HomePage defining mechanics onto this Astro homepage. Wrote `docs/simonaking-refactor-breakdown.md`. No homepage UI.
 
 ### 2. 评审 — done
 
-Adversarial review of the breakdown against current `src/`, `e2e/`, `package.json`, leftover `design-upgrade` / stash / `gh-pages`, and SimonAKing/HomePage sources. Wrote `docs/simonaking-refactor-review.md`. No homepage UI implemented.
+Adversarial review. Wrote `docs/simonaking-refactor-review.md`. Required locks (search chrome, featured-notes e2e, compile-time fluid-off) frozen above. No homepage UI.
 
-**Findings summary**
+### 3. 归档 — done
 
-| Requirement | Result |
-| --- | --- |
-| Joe Cheung identity; no `supportAuthor` / Simon avatar | **PASS** |
-| PavelDoGreat fluid, toggleable; wrap IIFE so import is inert | **PASS (lock wrap + test split)** |
-| Reduced-motion turns fluid off and skips 1100ms morph | **PASS** |
-| Notes / search / projects reachable; MDX + `projects.ts` untouched | **PASS (lock chrome)** |
-| Real featured-notes region **or** spec update | **FAIL as written** — current spec is a false green if Start Here is missing; 归档 must keep the region **and** strengthen the spec |
-| Intro `#search-trigger` **or** search spec update | **FAIL as written** — lock intro chrome + mounted `SearchModal`; do not require enter first |
-| No design-upgrade CSS-only `.hero-grid` / “no canvas” contract | **PASS** — do not port `e2e/reduced-motion-hero.spec.ts` |
-| No Vue / Pug / Gulp | **PASS** |
-| 上线 `npm run deploy:github` / `gh-pages`, not Docker | **PASS** |
-| Snake `GridAnimation` | **PASS — stays out** (评审 does not add it) |
-| Workflow serial driver | **PASS** |
-
-Compile-time `intro.background === false` is **not** a single-`dist` Playwright case. Unit-test `shouldStartFluid`; e2e “off” is `prefers-reduced-motion: reduce`.
+This file is the frozen plan. 需求拆解 / 评审 / 归档 = done. **开发** is next.
 
 **What changed this phase**
 
-- Added `docs/simonaking-refactor-review.md` (pass/fail table, findings F1–F10, required edits before 开发).
-- Updated this handoff: 评审 = done; 归档 is next; lock list below.
+- Replaced handoff “Next phase must (归档)” with the locked config, fluid table, chrome, transition, files, e2e, leftovers, and 开发 order.
 - Did **not** edit `src/pages/index.astro` or any runtime UI.
 - Did **not** merge `design-upgrade` or apply `stash@{0}`.
-
-## Next phase must (归档)
-
-Freeze the agreed plan into **this** handoff (minimal edits, no new design). Mark 需求拆解 / 评审 / 归档 done and 开发 next.
-
-### What 归档 must lock
-
-1. **Identity.** `homepage.config` head/intro/main from `siteConfig` (Joe Cheung, role/roleZh, email, github). Forbidden: `supportAuthor`, Simon avatar/title/subtitle/signature, GitHub-corner, `log.min.js`. Favicon `/favicon.svg`. Avatar field unset.
-2. **Fluid on/off.** `shouldStartFluid({backgroundEnabled, reducedMotion}) === backgroundEnabled && !reducedMotion`. Default `intro.background: true`. Vendor PavelDoGreat as `src/scripts/webgl-fluid.js` (MIT Pavel Dobryakov header, inert import, `startFluid`/`stopFluid`). Homepage-only. `data-fluid-background=on|off` on a homepage wrapper. Unit-test both false branches. E2E off-path = reduced-motion (not a second production build).
-3. **Intro chrome.** First paint of `/`: exactly one `#search-trigger` + mounted `SearchModal` + Lang/Theme toggles. Do not update search specs to click enter first. Do not ship two `#search-trigger` ids.
-4. **Featured notes.** Keep Start Here (`Card.astro` `article` → one non-empty `a`) on `/` in the DOM (`#featured-notes` recommended). Heading accessible name stays `Start Here`. 测试 strengthens `card-link-structure` to attached region + `article a` count ≥ 1. Selected work + latest notes stay on main; Focus cards drop.
-5. **Transition.** `data-page-transition=intro|main|busy` on the homepage wrapper. Enter click / wheel down / swipe-up; one-shot; ~1100ms when motion allowed; reduced-motion skips morph and does not start fluid. `ClientRouter` re-added cleanly in `BaseLayout`; Header search rebind on `astro:page-load`. No `GridAnimation` / `#gridCanvas`. Path morph: WAAPI `translateY` required; anime.js only if npm/vendored (no jsDelivr).
-6. **Files.** Add/edit/do-not-touch as breakdown §9, plus prefer `.js` for the sim. Do not rewrite MDX bodies or `src/data/projects.ts` semantics. Drop `.hero-grid` as the homepage background.
-7. **Leftovers.** `design-upgrade` 9 commits, `stash@{0}`, `origin/gh-pages` stay unmixed. Do not port `reduced-motion-hero.spec.ts`.
-8. **E2E / 上线.** `test:e2e` added in 测试. Dual `npm run build`. 上线 is `npm run deploy:github` (`gh-pages`), not Docker, not merge to `main`.
-9. **390px.** Intro shows name + enter; after enter, name/signature + Blog/About/Email/GitHub visible without the hamburger.
-10. **Next 开发 steps.** config → fluid → homepage → transitions (workflow order).
-11. **测试-only env.** If Playwright cannot reach `:4321`, add a localhost `NO_PROXY` bypass in `playwright.config.ts`. Do not apply `stash@{0}`.
