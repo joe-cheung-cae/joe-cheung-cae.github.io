@@ -1,0 +1,5 @@
+# Grok 4.6 medium-high reasoning executor
+description = "Grok 4.6 medium-high reasoning executor"
+default_capability_mode = "all"
+model = "grok-4.6"
+reasoning_effort = "medium"
