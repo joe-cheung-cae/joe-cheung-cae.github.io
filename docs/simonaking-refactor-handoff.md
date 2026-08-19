@@ -5,8 +5,8 @@
 | Field | Value |
 | --- | --- |
 | Branch | `refactor` (from clean `main` `51f2ef8`; 评审 `10a1805`) |
-| Current phase | **开发** (config + fluid + homepage + transitions done → 测试 next) |
-| Next phase | **测试** |
+| Current phase | **测试** (done) |
+| Next phase | **上线** |
 | Site identity | Joe Cheung · CAE & HPC Engineer (not SimonAKing) |
 | Workflow | `.grok/workflows/homepage-refactor.rhai` (**exists**) |
 | Breakdown | `docs/simonaking-refactor-breakdown.md` (done) |
@@ -14,7 +14,7 @@
 | Thinking roles | grok-46-high (需求拆解 / 评审 / 开发), grok-46-low (归档), grok-46-medium (测试 / 上线) |
 | UI this phase | Two-screen `/` shipped: config identity, PavelDoGreat fluid, 1100ms enter, ClientRouter. |
 
-Phases done: **需求拆解**, **评审**, **归档**, **开发/config**, **开发/fluid**, **开发/homepage**, **开发/transitions**. Next: **测试**.
+Phases done: **需求拆解**, **评审**, **归档**, **开发/config**, **开发/fluid**, **开发/homepage**, **开发/transitions**, **测试**. Next: **上线**.
 
 ---
 
@@ -270,3 +270,34 @@ Smooth intro→main switch and inner-route ClientRouter. Joe Cheung identity onl
 - `#homepage` wrapper `data-page-transition=intro|busy|main`. Reduced motion skips the morph (jump to `main`, no long `busy`) and does **not** start fluid.
 - Mounted Astro 5 `ClientRouter` from `astro:transitions` in `BaseLayout`. Search ⌘K / `#search-trigger` rebound on `astro:page-load` via AbortController. Theme/lang copied on `astro:before-swap`; toggles `transition:persist`.
 - `SearchModal` `open-search` unchanged. Did **not** rewrite MDX or `src/data/projects.ts`. Did **not** mix `design-upgrade` leftovers. No snake / `#gridCanvas`.
+
+### 8. 测试 — done
+
+Playwright on built `dist` + dual `npm run build`. Joe Cheung identity only.
+
+**What changed this phase**
+
+- Added `e2e/homepage-simonaking.spec.ts`: config name/role (en + `data-lang=zh`), `canvas#background` when motion allowed, canvas **absent** under `prefers-reduced-motion: reduce` (single-`dist` stand-in for background off), enter `intro → busy/main` + intro leaves, 390px identity + card nav without hamburger, critical controls non-empty.
+- Strengthened `e2e/card-link-structure.spec.ts` to `#featured-notes` attached, heading **Start Here**, `article a` ≥ 1, no empty anchors.
+- Added `package.json` script `"test:e2e": "playwright test"`. Localhost `NO_PROXY` bypass in `playwright.config.ts`.
+- Search + dual-theme specs stay green (`#search-trigger` on first paint of `/`; dual-theme still hits `/blog/cmake-modern-targets`). Spec-only robustness: IME ArrowDown via `window` keydown, `c++` query blurs then arrows, theme screenshots target `(dark|light) mode` (not LangToggle).
+- Did **not** assert compile-time `intro.background === false` in one `dist`. Did **not** rewrite MDX or `src/data/projects.ts`. Did **not** mix `design-upgrade` leftovers.
+
+**Dual build**
+
+| Run | Command | Exit | `dist` |
+| --- | --- | --- | --- |
+| 1 | `npm run build` | 0 | 36 pages; `dist/index.html` + `/blog/` `/projects/` `/about/` `/search/` |
+| 2 | `npm run build` | 0 | same; `index.html` 50695 bytes, non-empty inner routes |
+
+**`npm run test:e2e`** (chromium, `npx serve dist -p 4321`)
+
+| Run | Result |
+| --- | --- |
+| 1 | **18 passed** (6.9s) |
+| 2 | **18 passed** (6.5s) |
+| 3 (parent, after importing `homepageConfig` into the spec) | **18 passed** (8.5s) |
+
+Covered: `homepage-simonaking` (6), `card-link-structure` (1), `search-keyboard-shortcuts` (3), `dual-theme-syntax-highlighting` (7). Identity assertions read `homepageConfig`, not a reimplemented string.
+
+Parent also re-ran `npm run build` twice (both exit 0, 36 pages, `dist/index.html` 50695 bytes). Playwright 1.58.2. Probe: `/` identity Joe Cheung, canvas 1280×800, zero page errors; second WebGL context readback is null (context already owned).

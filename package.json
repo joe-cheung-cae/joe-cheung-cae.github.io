@@ -12,7 +12,8 @@
     "preview:docker": "docker run -p 8080:80 joe-blog",
     "deploy:github": "npm run build:github && touch dist/.nojekyll && gh-pages -d dist --dotfiles",
     "astro": "astro",
-    "test:unit": "node --test --experimental-strip-types src/lib/*.test.ts"
+    "test:unit": "node --test --experimental-strip-types src/lib/*.test.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.0.0",
