@@ -1,0 +1,23 @@
+---
+import ThemeToggle from '../ThemeToggle';
+import LangToggle from '../LangToggle';
+---
+
+<div class="homepage-chrome" data-homepage-chrome>
+  <button
+    type="button"
+    id="search-trigger"
+    class="homepage-chrome-btn flex items-center gap-2 min-h-11 px-3 rounded-md text-sm"
+    aria-label="Open search"
+  >
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+    </svg>
+    <kbd class="homepage-chrome-kbd hidden md:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono rounded">
+      ⌘K
+    </kbd>
+  </button>
+
+  <LangToggle client:only="preact" transition:persist="lang-toggle" />
+  <ThemeToggle client:only="preact" transition:persist="theme-toggle" />
+</div>

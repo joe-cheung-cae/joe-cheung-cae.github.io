@@ -5,16 +5,16 @@
 | Field | Value |
 | --- | --- |
 | Branch | `refactor` (from clean `main` `51f2ef8`; 评审 `10a1805`) |
-| Current phase | **归档 — done** |
-| Next phase | **开发** (config → fluid → homepage → transitions) |
+| Current phase | **开发** (config + fluid + homepage + transitions done → 测试 next) |
+| Next phase | **测试** |
 | Site identity | Joe Cheung · CAE & HPC Engineer (not SimonAKing) |
 | Workflow | `.grok/workflows/homepage-refactor.rhai` (**exists**) |
 | Breakdown | `docs/simonaking-refactor-breakdown.md` (done) |
 | Review | `docs/simonaking-refactor-review.md` (**PASS WITH REQUIRED EDITS**, done) |
 | Thinking roles | grok-46-high (需求拆解 / 评审 / 开发), grok-46-low (归档), grok-46-medium (测试 / 上线) |
-| UI this phase | **None.** Archive only. |
+| UI this phase | Two-screen `/` shipped: config identity, PavelDoGreat fluid, 1100ms enter, ClientRouter. |
 
-Phases done: **需求拆解**, **评审**, **归档**. Do not start UI until 开发.
+Phases done: **需求拆解**, **评审**, **归档**, **开发/config**, **开发/fluid**, **开发/homepage**, **开发/transitions**. Next: **测试**.
 
 ---
 
@@ -191,10 +191,10 @@ Inner routes stay: `/` `/blog` `/blog/[slug]` `/projects` `/about` `/search` `/l
 
 ## Next 开发 steps (workflow order)
 
-1. **config** — `homepage.config.ts` + `shouldStartFluid` + transition helpers + unit tests for both fluid false branches.
-2. **fluid** — vendor `webgl-fluid.js` (inert import); homepage-only start/stop; `data-fluid-background`.
-3. **homepage** — two-screen `index.astro`; intro chrome; Start Here + selected work + latest notes; drop Focus + `.hero-grid` background.
-4. **transitions** — 1100ms / reduced-motion skip; `ClientRouter` + search rebind.
+1. **config** — done (`homepage.config.ts` + `shouldStartFluid` + transition helpers + unit tests for both fluid false branches).
+2. **fluid** — done (`webgl-fluid.js` inert import; homepage-only start/stop; `data-fluid-background`).
+3. **homepage** — done (two-screen `index.astro`; intro chrome; Start Here + selected work + latest notes; drop Focus + `.hero-grid` background).
+4. **transitions** — done (1100ms WAAPI switch; reduced-motion skip; `ClientRouter` + search rebind).
 
 ---
 
@@ -221,3 +221,52 @@ This file is the frozen plan. 需求拆解 / 评审 / 归档 = done. **开发** 
 - Replaced handoff “Next phase must (归档)” with the locked config, fluid table, chrome, transition, files, e2e, leftovers, and 开发 order.
 - Did **not** edit `src/pages/index.astro` or any runtime UI.
 - Did **not** merge `design-upgrade` or apply `stash@{0}`.
+
+### 4. 开发/config — done
+
+Encapsulated Joe Cheung homepage identity. No homepage UI rewrite.
+
+**What changed this phase**
+
+- Extended `src/site.config.ts` with `siteIdentity` (`author`, `role`, `roleZh`, `email`, `github`, `description`). Existing `siteConfig` fields unchanged.
+- Added `src/homepage.config.ts` (`head` / `intro` / `main`) sourced from `siteConfig`. Avatar unset. No `supportAuthor`.
+- Added Zod `parseHomepageConfig` / `createHomepageConfig` in `src/lib/homepage-schema.ts`. `intro.background` defaults to `true`.
+- Added `src/lib/fluid-control.ts` (`shouldStartFluid` === `backgroundEnabled && !reducedMotion`) and `src/lib/page-transition.ts` (`isIntroActive`, reduced-motion skip, one-shot `intro → busy → main`).
+- Unit tests: both `shouldStartFluid` false branches, transition skip/lock, schema parse. `npm run test:unit`.
+- Did **not** rewrite `src/pages/index.astro` UI. Did **not** vendor fluid or add ClientRouter.
+
+### 5. 开发/fluid — done
+
+Vendored PavelDoGreat as used by SimonAKing. Homepage-only start/stop. No two-screen rewrite.
+
+**What changed this phase**
+
+- Added `src/scripts/webgl-fluid.js` (MIT / Copyright (c) 2017 Pavel Dobryakov). Import is inert. Exports `startFluid(canvas)` / `stopFluid()`.
+- Homepage intro: `canvas#background` is created only when `intro.background` is true **and** motion is allowed. Reduced-motion never creates the node.
+- `#homepage` wrapper `data-fluid-background=on|off` reflects the **decision**, not GPU success.
+- `FluidBackground` island (homepage only) dynamically imports the sim after `shouldStartFluid`. `stopFluid()` on `pagehide`, `astro:before-swap`, and `data-page-transition=main`.
+- Did **not** load the sim from `BaseLayout` or inner routes. Did **not** rebuild the two-screen homepage. Did **not** add ClientRouter.
+
+### 6. 开发/homepage — done
+
+Two-screen homepage from `homepageConfig`. Joe Cheung identity only.
+
+**What changed this phase**
+
+- Rebuilt `src/pages/index.astro` on `BaseLayout` (full-bleed intro). Compact chrome: one `#search-trigger` + Lang + Theme + mounted `SearchModal`. No sticky Header overlay on intro.
+- Intro: config title / subtitle / enter, `canvas#background` when fluid is on, SVG `.shape-wrap`, arrows. Dark fluid aesthetic, IBM Plex, no Comic Sans, no GitHub-corner / avatar / `supportAuthor`.
+- Main: identity card (name, signature, Blog / About / Email / GitHub), selected work, `#featured-notes` Start Here (`article` → one `a`), latest notes. Focus cards and `.hero-grid` background dropped.
+- `IntroMotion` binds enter / wheel-down / swipe-up (one-shot). Wrapper `data-page-transition=intro|busy|main`. Reduced motion jumps to `main` before paint and does not start fluid.
+- New UI strings are `i18n-en` / `i18n-zh`. 390px: intro name + enter; after enter (and immediately under reduced-motion) name / signature / card links stay visible without a hamburger.
+- Did **not** add `ClientRouter`. Did **not** rewrite MDX or `src/data/projects.ts`. Did **not** mix `design-upgrade` leftovers.
+
+### 7. 开发/transitions — done
+
+Smooth intro→main switch and inner-route ClientRouter. Joe Cheung identity only.
+
+**What changed this phase**
+
+- Intro enter / wheel-down / swipe-up stay one-shot `loadAll`. Motion allowed: WAAPI `translateY(-200vh)` + shape `scaleY`, delayed switch **1100ms**, then `data-page-transition=main`. Path `d` morph skipped (not a WAAPI given; no anime.js).
+- `#homepage` wrapper `data-page-transition=intro|busy|main`. Reduced motion skips the morph (jump to `main`, no long `busy`) and does **not** start fluid.
+- Mounted Astro 5 `ClientRouter` from `astro:transitions` in `BaseLayout`. Search ⌘K / `#search-trigger` rebound on `astro:page-load` via AbortController. Theme/lang copied on `astro:before-swap`; toggles `transition:persist`.
+- `SearchModal` `open-search` unchanged. Did **not** rewrite MDX or `src/data/projects.ts`. Did **not** mix `design-upgrade` leftovers. No snake / `#gridCanvas`.

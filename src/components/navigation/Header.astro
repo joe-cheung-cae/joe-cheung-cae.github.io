@@ -56,8 +56,8 @@ const currentPath = Astro.url.pathname;
           </kbd>
         </button>
 
-        <LangToggle client:only="preact" />
-        <ThemeToggle client:only="preact" />
+        <LangToggle client:only="preact" transition:persist="lang-toggle" />
+        <ThemeToggle client:only="preact" transition:persist="theme-toggle" />
 
         <button
           type="button"
@@ -92,23 +92,3 @@ const currentPath = Astro.url.pathname;
   </div>
 </header>
 
-<script>
-  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-  const mobileMenu = document.getElementById('mobile-menu');
-
-  mobileMenuBtn?.addEventListener('click', () => {
-    mobileMenu?.classList.toggle('hidden');
-  });
-
-  const searchTrigger = document.getElementById('search-trigger');
-  searchTrigger?.addEventListener('click', () => {
-    window.dispatchEvent(new CustomEvent('open-search'));
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-      e.preventDefault();
-      window.dispatchEvent(new CustomEvent('open-search'));
-    }
-  });
-</script>

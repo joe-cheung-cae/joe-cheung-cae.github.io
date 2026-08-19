@@ -43,5 +43,5 @@ const searchIndex = allPosts.map(post => ({
     <slot />
   </main>
   <Footer />
-  <SearchModal client:idle searchIndex={searchIndex} />
+  <SearchModal client:idle searchIndex={searchIndex} transition:persist="search-modal" />
 </BaseLayout>
