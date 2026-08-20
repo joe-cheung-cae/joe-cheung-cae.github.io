@@ -10,6 +10,7 @@ import {
   HOMEPAGE_NOTES_PRIMARY_FAMILY,
   HOMEPAGE_NOTES_WOFF2_FILE,
   HOMEPAGE_NOTES_WOFF2_PATH,
+  cssAppliesMapleMonoToCodeSnippets,
   cssEnablesMapleMonoLigatures,
   cssUsesComicCodeLocal,
   extractCssVarFontFallback,
@@ -18,6 +19,7 @@ import {
   homepageNotesInlineStyle,
   homepageNotesLigatureFeatureSettings,
   isHomepageNotesPrimary,
+  mapleMonoCodeSnippetCss,
   mapleMonoNfCnFontFaceIsDeclared,
   primaryFontFamily,
 } from './homepage-notes-font.ts';
@@ -90,6 +92,19 @@ describe('homepage notes font stack', () => {
     const latestBlock = homepagePage.slice(latestIndex);
     assert.match(latestBlock, /i18n-en/);
     assert.match(latestBlock, /i18n-zh/);
+  });
+
+  test('code snippets use Maple Mono NF CN with calt ligatures on every page', () => {
+    const snippetCss = mapleMonoCodeSnippetCss();
+    assert.equal(cssAppliesMapleMonoToCodeSnippets(snippetCss), true);
+    assert.match(snippetCss, /\.astro-code/);
+    assert.match(snippetCss, /font-feature-settings/);
+    assert.match(snippetCss, /["']calt["']\s*1/);
+    assert.equal(isHomepageNotesPrimary(HOMEPAGE_NOTES_FONT_STACK), true);
+
+    const layout = readFileSync(join(here, '../layouts/BaseLayout.astro'), 'utf8');
+    assert.match(layout, /homepageNotesFontFaceCss\(\)/);
+    assert.match(layout, /mapleMonoCodeSnippetCss\(\)/);
   });
 
   test('self-hosted NF CN WOFF2 and OFL-1.1 text are present', () => {

@@ -1,6 +1,7 @@
 ---
 import { ClientRouter } from 'astro:transitions';
 import { siteConfig } from '@/site.config';
+import { homepageNotesFontFaceCss, mapleMonoCodeSnippetCss } from '@/lib/homepage-notes-font';
 import '@/styles/global.css';
 
 interface Props {
@@ -74,6 +75,7 @@ const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
       rel="stylesheet"
     />
+    <Fragment set:html={`<style data-maple-mono-font>${homepageNotesFontFaceCss()}\n${mapleMonoCodeSnippetCss()}</style>`} />
 
     <title>{fullTitle}</title>
     <link rel="alternate" type="application/rss+xml" title={siteConfig.author} href="/rss.xml" />

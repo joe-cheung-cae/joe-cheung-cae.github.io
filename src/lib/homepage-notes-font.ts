@@ -184,3 +184,24 @@ export function cssEnablesMapleMonoLigatures(css: string): boolean {
     return hasCaltOn && hasLigaOn && hasEn && hasZh;
   });
 }
+
+export function mapleMonoCodeSnippetCss(): string {
+  return [
+    '.prose-custom pre,',
+    '.prose-custom :not(pre) > code,',
+    '.astro-code,',
+    '.astro-code code,',
+    '.astro-code span {',
+    `  font-family: ${HOMEPAGE_NOTES_FONT_STACK};`,
+    '  font-variant-ligatures: common-ligatures contextual;',
+    `  font-feature-settings: ${HOMEPAGE_NOTES_LIGATURE_FEATURES};`,
+    '}',
+  ].join('\n');
+}
+
+export function cssAppliesMapleMonoToCodeSnippets(css: string): boolean {
+  const hasAstro = /\.astro-code/.test(css);
+  const hasFamily = /font-family\s*:[^;]*Maple Mono NF CN/.test(css);
+  const hasCalt = /font-feature-settings\s*:[^;]*["']calt["']\s*1/.test(css);
+  return hasAstro && hasFamily && hasCalt;
+}
