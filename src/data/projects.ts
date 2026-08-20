@@ -30,7 +30,7 @@ export const projects: Project[] = [
   {
     name: 'muparserx-wrapper',
     blurbEn:
-      'C++17 JSON-defined expression runtime on muparserx. Constants, tables, and expressions behind a clean solver-facing API.',
+      'C++17 JSON-defined expression runtime on muparserx. Constants, tables, and expressions behind a solver-facing API.',
     blurbZh: '基于 muparserx 的 C++17 JSON 表达式运行时。常量、表格插值与表达式统一给求解器调用。',
     tags: ['C++17', 'CMake', 'Solvers'],
     github: 'https://github.com/joe-cheung-cae/muparserx-wrapper',
