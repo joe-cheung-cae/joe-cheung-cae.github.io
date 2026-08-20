@@ -9,7 +9,8 @@ export const HOMEPAGE_NOTES_WOFF2_PATH = `/fonts/${HOMEPAGE_NOTES_WOFF2_FILE}`;
 export const HOMEPAGE_NOTES_FONT_STACK =
   "'Maple Mono NF CN', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace";
 
-export const HOMEPAGE_NOTES_LIGATURE_FEATURES = '"calt" 1, "liga" 1, "kern" 1';
+export const HOMEPAGE_NOTES_LIGATURE_FEATURES =
+  '"calt" 1, "liga" 1, "clig" 1, "dlig" 1, "ss03" 1, "ss07" 1, "ss08" 1, "ss09" 1, "ss10" 1, "ss11" 1, "kern" 1';
 
 export const HOMEPAGE_NOTES_FONT_RELEASE = {
   source: 'https://github.com/subframe7536/maple-font',
@@ -193,7 +194,7 @@ export function mapleMonoCodeSnippetCss(): string {
     '.astro-code code,',
     '.astro-code span {',
     `  font-family: ${HOMEPAGE_NOTES_FONT_STACK};`,
-    '  font-variant-ligatures: common-ligatures contextual;',
+    '  font-variant-ligatures: common-ligatures discretionary-ligatures contextual;',
     `  font-feature-settings: ${HOMEPAGE_NOTES_LIGATURE_FEATURES};`,
     '}',
   ].join('\n');

@@ -67,17 +67,23 @@ describe('homepage notes font stack', () => {
 
   test('homepage notes re-enable Maple Mono calt ligatures over body feature-settings', () => {
     const settings = homepageNotesLigatureFeatureSettings();
-    assert.match(settings, /["']calt["']\s*1/);
-    assert.match(settings, /["']liga["']\s*1/);
+    for (const tag of ['calt', 'liga', 'clig', 'dlig', 'ss03', 'ss07', 'ss08', 'ss09', 'ss10', 'ss11']) {
+      assert.match(settings, new RegExp(`["']${tag}["']\\s*1`), `${tag} must be on`);
+    }
     assert.equal(/["']calt["']\s*0/.test(settings), false);
     assert.equal(
       /["']ss01["']\s*1/.test(settings),
       false,
       'ss01 is Maple Mono broken ==/!= ligatures and must stay off'
     );
+    assert.equal(/["']ss02["']\s*1/.test(settings), false);
+    assert.equal(/["']ss04["']\s*1/.test(settings), false);
+    assert.equal(/["']ss06["']\s*1/.test(settings), false);
     assert.equal(cssEnablesMapleMonoLigatures(homepageCss), true);
     assert.equal(cssEnablesMapleMonoLigatures(homepageNotesFontFaceCss()), false);
     assert.equal(/["']ss01["']\s*1/.test(homepageCss), false);
+    assert.match(homepageCss, /["']ss07["']\s*1/);
+    assert.match(homepageCss, /["']ss11["']\s*1/);
   });
 
   test('index.astro wires featured and latest notes to the shipped Maple Mono NF CN style', () => {
@@ -106,6 +112,9 @@ describe('homepage notes font stack', () => {
     assert.match(snippetCss, /\.astro-code/);
     assert.match(snippetCss, /font-feature-settings/);
     assert.match(snippetCss, /["']calt["']\s*1/);
+    assert.match(snippetCss, /["']ss07["']\s*1/);
+    assert.match(snippetCss, /["']ss08["']\s*1/);
+    assert.match(snippetCss, /["']ss11["']\s*1/);
     assert.equal(
       /["']ss01["']\s*1/.test(snippetCss),
       false,

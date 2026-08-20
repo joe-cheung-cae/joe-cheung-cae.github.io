@@ -25,6 +25,9 @@ test('post code snippets use Maple Mono NF CN with calt ligatures', async ({ pag
   expect(isHomepageNotesPrimary(computed.family)).toBe(true);
   expect(primaryFontFamily(computed.family)).toBe(HOMEPAGE_NOTES_PRIMARY_FAMILY);
   expect(computed.features).toMatch(/calt/);
+  expect(computed.features).toMatch(/ss07/);
+  expect(computed.features).toMatch(/ss08/);
+  expect(computed.features).toMatch(/ss11/);
   expect(computed.features.toLowerCase()).not.toMatch(/ss01/);
   expect(computed.ligatures).toMatch(/contextual|common-ligatures|normal/i);
 
