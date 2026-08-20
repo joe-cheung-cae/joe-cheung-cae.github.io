@@ -70,8 +70,14 @@ describe('homepage notes font stack', () => {
     assert.match(settings, /["']calt["']\s*1/);
     assert.match(settings, /["']liga["']\s*1/);
     assert.equal(/["']calt["']\s*0/.test(settings), false);
+    assert.equal(
+      /["']ss01["']\s*1/.test(settings),
+      false,
+      'ss01 is Maple Mono broken ==/!= ligatures and must stay off'
+    );
     assert.equal(cssEnablesMapleMonoLigatures(homepageCss), true);
     assert.equal(cssEnablesMapleMonoLigatures(homepageNotesFontFaceCss()), false);
+    assert.equal(/["']ss01["']\s*1/.test(homepageCss), false);
   });
 
   test('index.astro wires featured and latest notes to the shipped Maple Mono NF CN style', () => {
@@ -100,6 +106,11 @@ describe('homepage notes font stack', () => {
     assert.match(snippetCss, /\.astro-code/);
     assert.match(snippetCss, /font-feature-settings/);
     assert.match(snippetCss, /["']calt["']\s*1/);
+    assert.equal(
+      /["']ss01["']\s*1/.test(snippetCss),
+      false,
+      'code snippets must not enable Maple Mono ss01 (broken ==/!=)'
+    );
     assert.equal(isHomepageNotesPrimary(HOMEPAGE_NOTES_FONT_STACK), true);
 
     const layout = readFileSync(join(here, '../layouts/BaseLayout.astro'), 'utf8');

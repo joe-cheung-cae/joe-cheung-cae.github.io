@@ -9,7 +9,7 @@ export const HOMEPAGE_NOTES_WOFF2_PATH = `/fonts/${HOMEPAGE_NOTES_WOFF2_FILE}`;
 export const HOMEPAGE_NOTES_FONT_STACK =
   "'Maple Mono NF CN', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace";
 
-export const HOMEPAGE_NOTES_LIGATURE_FEATURES = '"calt" 1, "liga" 1, "ss01" 1, "kern" 1';
+export const HOMEPAGE_NOTES_LIGATURE_FEATURES = '"calt" 1, "liga" 1, "kern" 1';
 
 export const HOMEPAGE_NOTES_FONT_RELEASE = {
   source: 'https://github.com/subframe7536/maple-font',

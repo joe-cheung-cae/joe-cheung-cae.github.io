@@ -7,15 +7,16 @@ import {
 
 test('post code snippets use Maple Mono NF CN with calt ligatures', async ({ page }) => {
   await page.goto('/blog/cpp-move-semantics');
-  const code = page.locator('pre.astro-code').filter({ hasText: '&&' }).first();
-  await expect(code).toBeVisible();
-  await expect(code).toContainText('&&');
+  const equalsBlock = page.locator('pre.astro-code').filter({ hasText: '==' }).first();
+  const notEqualsBlock = page.locator('pre.astro-code').filter({ hasText: '!=' }).first();
+  await expect(equalsBlock).toBeVisible();
+  await expect(notEqualsBlock).toBeVisible();
 
   await page.evaluate(async () => {
     await document.fonts.ready;
   });
 
-  const computed = await code.evaluate((el) => ({
+  const computed = await equalsBlock.evaluate((el) => ({
     family: getComputedStyle(el).fontFamily,
     features: getComputedStyle(el).fontFeatureSettings,
     ligatures: getComputedStyle(el).fontVariantLigatures,
@@ -24,6 +25,7 @@ test('post code snippets use Maple Mono NF CN with calt ligatures', async ({ pag
   expect(isHomepageNotesPrimary(computed.family)).toBe(true);
   expect(primaryFontFamily(computed.family)).toBe(HOMEPAGE_NOTES_PRIMARY_FAMILY);
   expect(computed.features).toMatch(/calt/);
+  expect(computed.features.toLowerCase()).not.toMatch(/ss01/);
   expect(computed.ligatures).toMatch(/contextual|common-ligatures|normal/i);
 
   const fontOk = await page.evaluate(
