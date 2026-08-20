@@ -43,3 +43,9 @@ When creating PRs:
 4. **Commit & Push**
    - Detailed commit messages
    - Follow conventional commits format
+
+## Local Grok workflows
+
+Do not commit `.grok/workflows/*.rhai` (for example `homepage-shuorenhua.rhai` and `homepage-shuorenhua-apply.rhai`). They are local orchestration scripts, not site source.
+
+Keep that path ignored in both `.gitignore` and `.dockerignore`. Do not `git add -f` them. If a similar file is already tracked, `git rm --cached` it and leave the working copy in place.

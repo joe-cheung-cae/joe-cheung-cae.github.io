@@ -28,3 +28,6 @@ pnpm-debug.log*
 playwright-report/
 test-results/
 e2e/screenshots/
+
+# Local Grok Build orchestration (not site source)
+.grok/workflows/

@@ -8,5 +8,7 @@ CHANGELOG.md
 .notes
 docs
 .github
+.grok
+.claude
 *.md
 !.env.docker
