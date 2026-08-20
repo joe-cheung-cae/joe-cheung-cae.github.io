@@ -1,9 +1,24 @@
-export const HOMEPAGE_NOTES_PRIMARY_FAMILY = 'Comic Code';
+export const HOMEPAGE_NOTES_PRIMARY_FAMILY = 'Maple Mono NF CN';
 
 export const HOMEPAGE_NOTES_CSS_PROPERTY = '--homepage-notes-font-family';
 
+export const HOMEPAGE_NOTES_WOFF2_FILE = 'MapleMono-NF-CN-Regular.woff2';
+
+export const HOMEPAGE_NOTES_WOFF2_PATH = `/fonts/${HOMEPAGE_NOTES_WOFF2_FILE}`;
+
 export const HOMEPAGE_NOTES_FONT_STACK =
-  "'Comic Code', ui-monospace, monospace, system-ui, sans-serif";
+  "'Maple Mono NF CN', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace";
+
+export const HOMEPAGE_NOTES_LIGATURE_FEATURES = '"calt" 1, "liga" 1, "ss01" 1, "kern" 1';
+
+export const HOMEPAGE_NOTES_FONT_RELEASE = {
+  source: 'https://github.com/subframe7536/maple-font',
+  tag: 'v7.9',
+  zip: 'MapleMono-NF-CN.zip',
+  zipBytes: 159498447,
+  ttf: 'MapleMono-NF-CN-Regular.ttf',
+  license: 'OFL-1.1',
+} as const;
 
 export function parseFontFamilyStack(stack: string): string[] {
   const families: string[] = [];
@@ -48,7 +63,7 @@ export function primaryFontFamily(stack: string): string {
   return first;
 }
 
-export function isComicCodePrimary(stack: string): boolean {
+export function isHomepageNotesPrimary(stack: string): boolean {
   return primaryFontFamily(stack) === HOMEPAGE_NOTES_PRIMARY_FAMILY;
 }
 
@@ -60,9 +75,9 @@ export function homepageNotesFontFaceCss(): string {
   return [
     '@font-face {',
     `  font-family: '${HOMEPAGE_NOTES_PRIMARY_FAMILY}';`,
-    "  src: local('Comic Code'), local('ComicCode');",
+    `  src: url('${HOMEPAGE_NOTES_WOFF2_PATH}') format('woff2');`,
     '  font-style: normal;',
-    '  font-weight: 100 900;',
+    '  font-weight: 400;',
     '  font-display: swap;',
     '}',
   ].join('\n');
@@ -78,10 +93,16 @@ export function extractCssVarFontFallback(css: string, property: string): string
   return fallback;
 }
 
-export function extractFontFaceFamilyAndLocals(
-  css: string
-): Array<{ family: string; locals: string[] }> {
-  const faces: Array<{ family: string; locals: string[] }> = [];
+export type FontFaceDeclaration = {
+  family: string;
+  locals: string[];
+  urls: string[];
+  formats: string[];
+  display: string | null;
+};
+
+export function extractFontFaceDeclarations(css: string): FontFaceDeclaration[] {
+  const faces: FontFaceDeclaration[] = [];
   const faceRe = /@font-face\s*\{([^}]+)\}/gi;
 
   for (let match = faceRe.exec(css); match; match = faceRe.exec(css)) {
@@ -94,20 +115,46 @@ export function extractFontFaceFamilyAndLocals(
       const name = localMatch[1]?.trim();
       if (name) locals.push(name);
     }
+    const urls: string[] = [];
+    const urlRe = /url\(\s*['"]?([^'")]+)['"]?\s*\)/gi;
+    for (let urlMatch = urlRe.exec(body); urlMatch; urlMatch = urlRe.exec(body)) {
+      const url = urlMatch[1]?.trim();
+      if (url) urls.push(url);
+    }
+    const formats: string[] = [];
+    const formatRe = /format\(\s*['"]?([^'")]+)['"]?\s*\)/gi;
+    for (let formatMatch = formatRe.exec(body); formatMatch; formatMatch = formatRe.exec(body)) {
+      const format = formatMatch[1]?.trim();
+      if (format) formats.push(format);
+    }
+    const display = body.match(/font-display\s*:\s*([^;]+)/i)?.[1]?.trim() ?? null;
     if (family) {
-      faces.push({ family, locals });
+      faces.push({ family, locals, urls, formats, display });
     }
   }
 
   return faces;
 }
 
-export function comicCodeFontFaceIsDeclared(css: string): boolean {
-  return extractFontFaceFamilyAndLocals(css).some(
+export function extractFontFaceFamilyAndLocals(
+  css: string
+): Array<{ family: string; locals: string[] }> {
+  return extractFontFaceDeclarations(css).map(({ family, locals }) => ({ family, locals }));
+}
+
+export function mapleMonoNfCnFontFaceIsDeclared(css: string): boolean {
+  return extractFontFaceDeclarations(css).some(
     (face) =>
       face.family === HOMEPAGE_NOTES_PRIMARY_FAMILY &&
-      face.locals.includes(HOMEPAGE_NOTES_PRIMARY_FAMILY)
+      face.urls.some((url) => url.includes(HOMEPAGE_NOTES_WOFF2_FILE)) &&
+      face.formats.includes('woff2') &&
+      face.display === 'swap' &&
+      face.locals.length === 0
   );
+}
+
+export function cssUsesComicCodeLocal(css: string): boolean {
+  return /local\(\s*['"]?Comic\s*Code['"]?\s*\)/i.test(css);
 }
 
 export function homepageNotesCssTargetsBothLangs(css: string): boolean {
@@ -118,5 +165,22 @@ export function homepageNotesCssTargetsBothLangs(css: string): boolean {
     const hasEn = /\.i18n-en/.test(rule);
     const hasZh = /\.i18n-zh/.test(rule);
     return hasFamily && hasEn && hasZh;
+  });
+}
+
+export function homepageNotesLigatureFeatureSettings(): string {
+  return HOMEPAGE_NOTES_LIGATURE_FEATURES;
+}
+
+export function cssEnablesMapleMonoLigatures(css: string): boolean {
+  const ruleRe = /\.homepage-notes[^{]*\{[^}]+\}/g;
+  const rules = css.match(ruleRe) ?? [];
+  return rules.some((rule) => {
+    const features = rule.match(/font-feature-settings\s*:\s*([^;]+)/i)?.[1] ?? '';
+    const hasCaltOn = /["']calt["']\s*1/.test(features);
+    const hasLigaOn = /["']liga["']\s*1/.test(features);
+    const hasEn = /\.i18n-en/.test(rule);
+    const hasZh = /\.i18n-zh/.test(rule);
+    return hasCaltOn && hasLigaOn && hasEn && hasZh;
   });
 }

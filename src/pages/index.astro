@@ -10,6 +10,7 @@ import { getCollection } from 'astro:content';
 import { homepageConfig } from '@/homepage.config';
 import { featuredProjects } from '@/data/projects';
 import { homepageNotesFontFaceCss, homepageNotesInlineStyle } from '@/lib/homepage-notes-font';
+import { ui } from '@/i18n/ui';
 import '@/styles/homepage.css';
 
 const backgroundEnabled = homepageConfig.intro.background;
@@ -29,7 +30,9 @@ const latestPosts = sortedPosts.filter((post) => !post.data.featured).slice(0, 3
 const searchIndex = allPosts.map((post) => ({
   id: post.slug,
   title: post.data.title,
+  titleZh: post.data.titleZh,
   description: post.data.description,
+  descriptionZh: post.data.descriptionZh,
   content: post.body?.slice(0, 2000) || '',
   slug: post.slug,
   tags: post.data.tags,
@@ -150,8 +153,8 @@ const shapePathTo =
           <div class="flex items-end justify-between gap-4 mb-8">
             <div>
               <h2 class="text-2xl font-semibold text-notion-text dark:text-notion-text-dark">
-                <span class="i18n-en">Selected work</span>
-                <span class="i18n-zh">精选项目</span>
+                <span class="i18n-en">{ui.en.selectedWork}</span>
+                <span class="i18n-zh">{ui.zh.selectedWork}</span>
               </h2>
               <p class="mt-1 text-sm text-notion-text/60 dark:text-notion-text-dark/55">
                 <span class="i18n-en">Public repositories only. Production solvers stay private.</span>
@@ -159,8 +162,8 @@ const shapePathTo =
               </p>
             </div>
             <a href="/projects" class="text-sm font-medium text-notion-blue hover:underline">
-              <span class="i18n-en">All projects</span>
-              <span class="i18n-zh">全部项目</span>
+              <span class="i18n-en">{ui.en.allProjects}</span>
+              <span class="i18n-zh">{ui.zh.allProjects}</span>
             </a>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -203,15 +206,18 @@ const shapePathTo =
           <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between mb-8">
               <div>
-                <h2 class="text-2xl font-semibold text-notion-text dark:text-notion-text-dark">Start Here</h2>
+                <h2 class="text-2xl font-semibold text-notion-text dark:text-notion-text-dark">
+                  <span class="i18n-en">{ui.en.startHere}</span>
+                  <span class="i18n-zh">{ui.zh.startHere}</span>
+                </h2>
                 <p class="text-sm text-notion-text/60 dark:text-notion-text-dark/55 mt-1">
-                  <span class="i18n-en">Featured notes</span>
-                  <span class="i18n-zh">精选笔记</span>
+                  <span class="i18n-en">{ui.en.featuredNotes}</span>
+                  <span class="i18n-zh">{ui.zh.featuredNotes}</span>
                 </p>
               </div>
               <a href="/blog" class="text-sm font-medium text-notion-blue hover:underline">
-                <span class="i18n-en">View all</span>
-                <span class="i18n-zh">全部笔记</span>
+                <span class="i18n-en">{ui.en.viewAllNotes}</span>
+                <span class="i18n-zh">{ui.zh.viewAllNotes}</span>
               </a>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -231,8 +237,8 @@ const shapePathTo =
         >
           <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="text-2xl font-semibold text-notion-text dark:text-notion-text-dark mb-8">
-              <span class="i18n-en">Latest notes</span>
-              <span class="i18n-zh">最近笔记</span>
+              <span class="i18n-en">{ui.en.latestNotes}</span>
+              <span class="i18n-zh">{ui.zh.latestNotes}</span>
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               {latestPosts.map((post) => (

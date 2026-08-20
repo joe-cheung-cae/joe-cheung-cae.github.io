@@ -1,4 +1,4 @@
-import { countWords } from '../lib/word-count';
+import { countWords } from '../lib/word-count.ts';
 
 /**
  * Calculate reading time for a given text
@@ -18,9 +18,13 @@ export function calculateReadingTime(content: string, wordsPerMinute = 200): num
 /**
  * Format reading time for display
  * @param minutes - Reading time in minutes
+ * @param locale - UI language (`en` or `zh`)
  * @returns Formatted string (e.g., "5 min read")
  */
-export function formatReadingTime(minutes: number): string {
+export function formatReadingTime(minutes: number, locale: 'en' | 'zh' = 'en'): string {
+  if (locale === 'zh') {
+    return `${minutes} 分钟阅读`;
+  }
   if (minutes === 1) {
     return '1 min read';
   }

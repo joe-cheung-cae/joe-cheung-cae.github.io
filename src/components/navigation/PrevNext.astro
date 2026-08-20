@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { ui } from '@/i18n/ui';
 
 interface Props {
   prev?: CollectionEntry<'posts'>;
@@ -16,10 +17,13 @@ const baseUrl = import.meta.env.BASE_URL || '/';
     {prev && (
       <a href={`${baseUrl}blog/${prev.slug}`} class="post-prev-next-link is-prev">
         <span class="post-prev-next-label">
-          <span class="i18n-en">Previous</span>
-          <span class="i18n-zh">上一篇</span>
+          <span class="i18n-en">{ui.en.previous}</span>
+          <span class="i18n-zh">{ui.zh.previous}</span>
         </span>
-        <span class="post-prev-next-title">{prev.data.title}</span>
+        <span class="post-prev-next-title">
+          <span class="i18n-en">{prev.data.title}</span>
+          <span class="i18n-zh">{prev.data.titleZh}</span>
+        </span>
       </a>
     )}
     {!prev && <div class="post-prev-next-spacer" />}
@@ -27,10 +31,13 @@ const baseUrl = import.meta.env.BASE_URL || '/';
     {next && (
       <a href={`${baseUrl}blog/${next.slug}`} class="post-prev-next-link is-next">
         <span class="post-prev-next-label">
-          <span class="i18n-en">Next</span>
-          <span class="i18n-zh">下一篇</span>
+          <span class="i18n-en">{ui.en.next}</span>
+          <span class="i18n-zh">{ui.zh.next}</span>
         </span>
-        <span class="post-prev-next-title">{next.data.title}</span>
+        <span class="post-prev-next-title">
+          <span class="i18n-en">{next.data.title}</span>
+          <span class="i18n-zh">{next.data.titleZh}</span>
+        </span>
       </a>
     )}
     {!next && <div class="post-prev-next-spacer" />}

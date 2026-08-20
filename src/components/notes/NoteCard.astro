@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { formatWords, ui } from '@/i18n/ui';
 import { coverStops, hashString } from '@/lib/note-cover';
 import { countWords } from '@/lib/word-count';
 import { formatDate } from '@/utils/formatDate';
@@ -10,7 +11,7 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { title, description, pubDate, tags } = post.data;
+const { title, titleZh, description, descriptionZh, pubDate, tags } = post.data;
 const body = post.body ?? '';
 const wordCount = countWords(body);
 const readingTime = post.data.readingTime ?? calculateReadingTime(body);
@@ -36,25 +37,37 @@ const href = `${baseUrl}blog/${post.slug}`;
   </div>
 
   <h3 class="post-title">
-    <a href={href}>{title}</a>
+    <a href={href}>
+      <span class="i18n-en">{title}</span>
+      <span class="i18n-zh">{titleZh}</span>
+    </a>
   </h3>
 
   <p class="post-meta">
-    <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
-    <span class="reading-time">{formatReadingTime(readingTime)}</span>
+    <time datetime={pubDate.toISOString()}>
+      <span class="i18n-en">{formatDate(pubDate, 'en')}</span>
+      <span class="i18n-zh">{formatDate(pubDate, 'zh')}</span>
+    </time>
+    <span class="reading-time">
+      <span class="i18n-en">{formatReadingTime(readingTime, 'en')}</span>
+      <span class="i18n-zh">{formatReadingTime(readingTime, 'zh')}</span>
+    </span>
     <span class="word-count">
-      <span class="i18n-en">{wordCount.toLocaleString('en-US')} words</span>
-      <span class="i18n-zh">{wordCount.toLocaleString('zh-Hans')} 词</span>
+      <span class="i18n-en">{formatWords('en', wordCount)}</span>
+      <span class="i18n-zh">{formatWords('zh', wordCount)}</span>
     </span>
   </p>
 
   <div class="post-content">
-    <p class="post-excerpt">{description}</p>
+    <p class="post-excerpt">
+      <span class="i18n-en">{description}</span>
+      <span class="i18n-zh">{descriptionZh}</span>
+    </p>
   </div>
 
   <a class="post-more" href={href}>
-    <span class="i18n-en">Read more</span>
-    <span class="i18n-zh">阅读全文</span>
+    <span class="i18n-en">{ui.en.readMore}</span>
+    <span class="i18n-zh">{ui.zh.readMore}</span>
   </a>
 
   {tags.length > 0 && (

@@ -62,6 +62,10 @@ describe('license and documentation provenance', () => {
       /(?:Pavel Dobryakov|WebGL-Fluid-Simulation)[\s\S]{0,500}\bMIT\b/,
       'NOTICE must name Pavel/WebGL-Fluid with MIT'
     );
+    assert.match(notice, /Maple Mono NF CN/);
+    assert.match(notice, /subframe7536\/maple-font/);
+    assert.match(notice, /OFL-1\.1|SIL Open Font License 1\.1/);
+    assert.match(notice, /MapleMono-NF-CN\.zip/);
   });
 
   test('vendored fluid script keeps the Pavel MIT copyright header', () => {

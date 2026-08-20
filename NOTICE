@@ -20,3 +20,13 @@ Upstream works used in the shipped source:
    Use:     Vendored path src/scripts/webgl-fluid.js via Simon
             src/js/background.js. The MIT header in that file must
             remain intact.
+
+3. Maple Mono NF CN (The Maple Mono Project Authors)
+   URL:     https://github.com/subframe7536/maple-font
+   Release: v7.9 MapleMono-NF-CN.zip
+   License: SIL Open Font License 1.1 (OFL-1.1)
+   Copyright 2022 The Maple Mono Project Authors
+   Use:     Homepage notes surfaces (#featured-notes, #latest-notes).
+            Self-hosted WOFF2 at public/fonts/MapleMono-NF-CN-Regular.woff2
+            encoded from the official MapleMono-NF-CN-Regular.ttf. OFL
+            text is at public/fonts/OFL.txt.

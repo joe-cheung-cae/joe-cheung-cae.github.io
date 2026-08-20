@@ -2,6 +2,7 @@
 import NotesLayout from '@/layouts/NotesLayout.astro';
 import NoteCard from '@/components/notes/NoteCard.astro';
 import { getCollection } from 'astro:content';
+import { ui } from '@/i18n/ui';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
@@ -50,8 +51,8 @@ const relatedTags = Array.from(relatedTagsMap.entries())
   {relatedTags.length > 0 && (
     <div class="taxonomy-related">
       <h2>
-        <span class="i18n-en">Topics</span>
-        <span class="i18n-zh">主题</span>
+        <span class="i18n-en">{ui.en.topicsHeading}</span>
+        <span class="i18n-zh">{ui.zh.topicsHeading}</span>
       </h2>
       <div class="flex flex-wrap gap-2">
         {relatedTags.map(tag => (
@@ -76,11 +77,11 @@ const relatedTags = Array.from(relatedTagsMap.entries())
     </ul>
   ) : (
     <div class="taxonomy-empty">
-      <p class="i18n-en">No posts found for this language.</p>
-      <p class="i18n-zh">这个语言下还没有笔记。</p>
+      <p class="i18n-en">{ui.en.noPostsLang}</p>
+      <p class="i18n-zh">{ui.zh.noPostsLang}</p>
       <a href="/languages" class="inline-flex items-center mt-4 text-notion-blue hover:underline">
-        <span class="i18n-en">Browse all languages</span>
-        <span class="i18n-zh">浏览全部语言</span>
+        <span class="i18n-en">{ui.en.browseAllLanguages}</span>
+        <span class="i18n-zh">{ui.zh.browseAllLanguages}</span>
       </a>
     </div>
   )}

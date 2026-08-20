@@ -1,8 +1,8 @@
 @font-face {
-  font-family: 'Comic Code';
-  src: local('Comic Code'), local('ComicCode');
+  font-family: 'Maple Mono NF CN';
+  src: url('/fonts/MapleMono-NF-CN-Regular.woff2') format('woff2');
   font-style: normal;
-  font-weight: 100 900;
+  font-weight: 400;
   font-display: swap;
 }
 
@@ -19,7 +19,12 @@
 .homepage-notes .i18n-zh,
 #featured-notes .i18n-zh,
 #latest-notes .i18n-zh {
-  font-family: var(--homepage-notes-font-family, 'Comic Code', ui-monospace, monospace, system-ui, sans-serif);
+  font-family: var(--homepage-notes-font-family, 'Maple Mono NF CN', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace);
+  font-variant-ligatures: common-ligatures contextual;
+  font-feature-settings: "calt" 1, "liga" 1, "ss01" 1, "kern" 1;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  min-width: 0;
 }
 
 .homepage-root {

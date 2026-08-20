@@ -1,14 +1,15 @@
 ---
 import { siteConfig } from '@/site.config';
+import { ui } from '@/i18n/ui';
 
 const baseUrl = import.meta.env.BASE_URL || '/';
 const currentYear = new Date().getFullYear();
 
 const footerLinks = [
-  { href: `${baseUrl}projects`, labelEn: 'Projects', labelZh: '项目' },
-  { href: `${baseUrl}blog`, labelEn: 'Notes', labelZh: '笔记' },
-  { href: `${baseUrl}gallery`, labelEn: 'Gallery', labelZh: '相册' },
-  { href: `${baseUrl}about`, labelEn: 'About', labelZh: '关于' },
+  { href: `${baseUrl}projects`, labelEn: ui.en.projects, labelZh: ui.zh.projects },
+  { href: `${baseUrl}blog`, labelEn: ui.en.notes, labelZh: ui.zh.notes },
+  { href: `${baseUrl}gallery`, labelEn: ui.en.gallery, labelZh: ui.zh.gallery },
+  { href: `${baseUrl}about`, labelEn: ui.en.about, labelZh: ui.zh.about },
   { href: `${baseUrl}rss.xml`, labelEn: 'RSS', labelZh: 'RSS' },
 ];
 ---
@@ -28,8 +29,8 @@ const footerLinks = [
 
       <div>
         <h3 class="text-xs font-semibold uppercase tracking-wider text-notion-text/50 dark:text-notion-text-dark/45 mb-4">
-          <span class="i18n-en">Site</span>
-          <span class="i18n-zh">本站</span>
+          <span class="i18n-en">{ui.en.site}</span>
+          <span class="i18n-zh">{ui.zh.site}</span>
         </h3>
         <ul class="space-y-2">
           {footerLinks.map((link) => (
@@ -48,8 +49,8 @@ const footerLinks = [
 
       <div>
         <h3 class="text-xs font-semibold uppercase tracking-wider text-notion-text/50 dark:text-notion-text-dark/45 mb-4">
-          <span class="i18n-en">Connect</span>
-          <span class="i18n-zh">联系</span>
+          <span class="i18n-en">{ui.en.connect}</span>
+          <span class="i18n-zh">{ui.zh.connect}</span>
         </h3>
         <ul class="space-y-2 text-sm">
           <li>

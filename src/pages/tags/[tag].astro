@@ -2,6 +2,7 @@
 import NotesLayout from '@/layouts/NotesLayout.astro';
 import NoteCard from '@/components/notes/NoteCard.astro';
 import { getCollection } from 'astro:content';
+import { ui } from '@/i18n/ui';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
@@ -54,8 +55,8 @@ const relatedTags = Array.from(relatedTagsMap.entries())
   {relatedTags.length > 0 && (
     <div class="taxonomy-related">
       <h2>
-        <span class="i18n-en">Related Tags</span>
-        <span class="i18n-zh">相关标签</span>
+        <span class="i18n-en">{ui.en.relatedTags}</span>
+        <span class="i18n-zh">{ui.zh.relatedTags}</span>
       </h2>
       <div class="flex flex-wrap gap-2">
         {relatedTags.map(relatedTag => (
@@ -80,11 +81,11 @@ const relatedTags = Array.from(relatedTagsMap.entries())
     </ul>
   ) : (
     <div class="taxonomy-empty">
-      <p class="i18n-en">No posts found with this tag.</p>
-      <p class="i18n-zh">这个标签下还没有笔记。</p>
+      <p class="i18n-en">{ui.en.noPostsTag}</p>
+      <p class="i18n-zh">{ui.zh.noPostsTag}</p>
       <a href="/tags" class="inline-flex items-center mt-4 text-notion-blue hover:underline">
-        <span class="i18n-en">Browse all tags</span>
-        <span class="i18n-zh">浏览全部标签</span>
+        <span class="i18n-en">{ui.en.browseAllTags}</span>
+        <span class="i18n-zh">{ui.zh.browseAllTags}</span>
       </a>
     </div>
   )}

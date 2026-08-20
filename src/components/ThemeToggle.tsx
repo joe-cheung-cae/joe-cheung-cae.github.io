@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'preact/hooks';
+import { LANG_CHANGE_EVENT, readDocumentLang, t, type UiLang } from '@/i18n/ui';
 
 export default function ThemeToggle() {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [mounted, setMounted] = useState(false);
+  const [lang, setLang] = useState<UiLang>('en');
 
   useEffect(() => {
     setMounted(true);
@@ -10,6 +12,11 @@ export default function ThemeToggle() {
     const currentTheme = savedTheme || 'dark';
     setTheme(currentTheme);
     document.documentElement.classList.toggle('dark', currentTheme === 'dark');
+
+    const syncLang = () => setLang(readDocumentLang(document.documentElement));
+    syncLang();
+    window.addEventListener(LANG_CHANGE_EVENT, syncLang);
+    return () => window.removeEventListener(LANG_CHANGE_EVENT, syncLang);
   }, []);
 
   const toggleTheme = () => {
@@ -24,7 +31,7 @@ export default function ThemeToggle() {
       type="button"
       onClick={toggleTheme}
       className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-md text-notion-text dark:text-notion-text-dark hover:bg-notion-gray dark:hover:bg-notion-gray-dark transition-colors"
-      aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+      aria-label={theme === 'light' ? t(lang, 'switchToDark') : t(lang, 'switchToLight')}
     >
       {mounted && theme === 'light' ? (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

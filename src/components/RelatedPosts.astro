@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { ui } from '@/i18n/ui';
 import NoteCard from './notes/NoteCard.astro';
 
 interface Props {
@@ -12,8 +13,8 @@ const { posts } = Astro.props;
 {posts.length > 0 && (
   <section class="related-posts">
     <h2>
-      <span class="i18n-en">Related notes</span>
-      <span class="i18n-zh">相关笔记</span>
+      <span class="i18n-en">{ui.en.relatedNotes}</span>
+      <span class="i18n-zh">{ui.zh.relatedNotes}</span>
     </h2>
     <ul class="post-list">
       {posts.map((post) => (

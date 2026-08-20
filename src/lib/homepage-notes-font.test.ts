@@ -1,45 +1,61 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { describe, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import {
   HOMEPAGE_NOTES_CSS_PROPERTY,
+  HOMEPAGE_NOTES_FONT_RELEASE,
   HOMEPAGE_NOTES_FONT_STACK,
   HOMEPAGE_NOTES_PRIMARY_FAMILY,
-  comicCodeFontFaceIsDeclared,
+  HOMEPAGE_NOTES_WOFF2_FILE,
+  HOMEPAGE_NOTES_WOFF2_PATH,
+  cssEnablesMapleMonoLigatures,
+  cssUsesComicCodeLocal,
   extractCssVarFontFallback,
   homepageNotesCssTargetsBothLangs,
   homepageNotesFontFaceCss,
   homepageNotesInlineStyle,
-  isComicCodePrimary,
+  homepageNotesLigatureFeatureSettings,
+  isHomepageNotesPrimary,
+  mapleMonoNfCnFontFaceIsDeclared,
   primaryFontFamily,
 } from './homepage-notes-font.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
+const repoRoot = join(here, '../..');
 const homepageCss = readFileSync(join(here, '../styles/homepage.css'), 'utf8');
 const homepagePage = readFileSync(join(here, '../pages/index.astro'), 'utf8');
+const woff2Path = join(repoRoot, 'public/fonts', HOMEPAGE_NOTES_WOFF2_FILE);
+const oflPath = join(repoRoot, 'public/fonts/OFL.txt');
 
 describe('homepage notes font stack', () => {
-  test('shipped stack lists Comic Code first for both language surfaces', () => {
-    assert.equal(HOMEPAGE_NOTES_PRIMARY_FAMILY, 'Comic Code');
-    assert.equal(primaryFontFamily(HOMEPAGE_NOTES_FONT_STACK), 'Comic Code');
-    assert.equal(isComicCodePrimary(HOMEPAGE_NOTES_FONT_STACK), true);
-    assert.equal(isComicCodePrimary("'IBM Plex Sans', system-ui, sans-serif"), false);
-    assert.equal(isComicCodePrimary('"Comic Sans MS", cursive'), false);
+  test('shipped stack lists Maple Mono NF CN first for both language surfaces', () => {
+    assert.equal(HOMEPAGE_NOTES_PRIMARY_FAMILY, 'Maple Mono NF CN');
+    assert.equal(primaryFontFamily(HOMEPAGE_NOTES_FONT_STACK), 'Maple Mono NF CN');
+    assert.equal(isHomepageNotesPrimary(HOMEPAGE_NOTES_FONT_STACK), true);
+    assert.equal(isHomepageNotesPrimary("'IBM Plex Sans', system-ui, sans-serif"), false);
+    assert.equal(isHomepageNotesPrimary("'Comic Code', ui-monospace, monospace"), false);
     assert.equal(
       primaryFontFamily(homepageNotesInlineStyle().split(':').slice(1).join(':')),
       HOMEPAGE_NOTES_PRIMARY_FAMILY
     );
-    assert.equal(comicCodeFontFaceIsDeclared(homepageNotesFontFaceCss()), true);
+    assert.equal(mapleMonoNfCnFontFaceIsDeclared(homepageNotesFontFaceCss()), true);
+    assert.equal(cssUsesComicCodeLocal(homepageNotesFontFaceCss()), false);
+    assert.match(homepageNotesFontFaceCss(), /font-display:\s*swap/);
+    assert.match(homepageNotesFontFaceCss(), new RegExp(HOMEPAGE_NOTES_WOFF2_PATH.replace('/', '\\/')));
+    assert.equal(HOMEPAGE_NOTES_FONT_RELEASE.zip, 'MapleMono-NF-CN.zip');
+    assert.equal(HOMEPAGE_NOTES_FONT_RELEASE.license, 'OFL-1.1');
   });
 
-  test('homepage.css declares Comic Code locally and applies it to en and zh notes', () => {
-    assert.equal(comicCodeFontFaceIsDeclared(homepageCss), true);
+  test('homepage.css declares Maple Mono NF CN via WOFF2 and applies it to en and zh notes', () => {
+    assert.equal(mapleMonoNfCnFontFaceIsDeclared(homepageCss), true);
+    assert.equal(cssUsesComicCodeLocal(homepageCss), false);
+    assert.equal(homepageCss.includes("local('Comic Code')"), false);
 
     const fallback = extractCssVarFontFallback(homepageCss, HOMEPAGE_NOTES_CSS_PROPERTY);
     assert.equal(primaryFontFamily(fallback), HOMEPAGE_NOTES_PRIMARY_FAMILY);
-    assert.equal(isComicCodePrimary(fallback), true);
+    assert.equal(isHomepageNotesPrimary(fallback), true);
     assert.equal(fallback.replace(/\s+/g, ' '), HOMEPAGE_NOTES_FONT_STACK);
 
     assert.equal(homepageNotesCssTargetsBothLangs(homepageCss), true);
@@ -47,7 +63,16 @@ describe('homepage notes font stack', () => {
     assert.equal(/font-family:\s*'IBM Plex Sans'/.test(fallback), false);
   });
 
-  test('index.astro wires featured and latest notes to the shipped Comic Code style', () => {
+  test('homepage notes re-enable Maple Mono calt ligatures over body feature-settings', () => {
+    const settings = homepageNotesLigatureFeatureSettings();
+    assert.match(settings, /["']calt["']\s*1/);
+    assert.match(settings, /["']liga["']\s*1/);
+    assert.equal(/["']calt["']\s*0/.test(settings), false);
+    assert.equal(cssEnablesMapleMonoLigatures(homepageCss), true);
+    assert.equal(cssEnablesMapleMonoLigatures(homepageNotesFontFaceCss()), false);
+  });
+
+  test('index.astro wires featured and latest notes to the shipped Maple Mono NF CN style', () => {
     assert.match(homepagePage, /from '@\/lib\/homepage-notes-font'/);
     assert.match(homepagePage, /homepageNotesFontFaceCss\(\)/);
     assert.match(homepagePage, /homepageNotesInlineStyle\(\)/);
@@ -65,5 +90,15 @@ describe('homepage notes font stack', () => {
     const latestBlock = homepagePage.slice(latestIndex);
     assert.match(latestBlock, /i18n-en/);
     assert.match(latestBlock, /i18n-zh/);
+  });
+
+  test('self-hosted NF CN WOFF2 and OFL-1.1 text are present', () => {
+    assert.equal(existsSync(woff2Path), true, `${HOMEPAGE_NOTES_WOFF2_FILE} must exist`);
+    assert.ok(statSync(woff2Path).size > 1000, 'WOFF2 must be non-empty');
+    assert.equal(existsSync(oflPath), true, 'OFL.txt must exist');
+    const ofl = readFileSync(oflPath, 'utf8');
+    assert.match(ofl, /SIL Open Font License, Version 1\.1/);
+    assert.match(ofl, /Maple Mono Project Authors/);
+    assert.equal(woff2Path.endsWith(HOMEPAGE_NOTES_WOFF2_FILE), true);
   });
 });

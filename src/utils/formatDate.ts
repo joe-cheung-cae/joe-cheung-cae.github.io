@@ -1,19 +1,30 @@
+export type DateLocale = 'en' | 'zh';
+
+const DATE_INTL: Record<DateLocale, string> = {
+  en: 'en-US',
+  zh: 'zh-CN',
+};
+
+const DEFAULT_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+};
+
 /**
  * Format a date for display
  * @param date - Date to format
+ * @param locale - UI language (`en` or `zh`)
  * @param options - Intl.DateTimeFormatOptions
  * @returns Formatted date string
  */
 export function formatDate(
   date: Date | string | number,
-  options: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }
+  locale: DateLocale = 'en',
+  options: Intl.DateTimeFormatOptions = DEFAULT_DATE_OPTIONS
 ): string {
   const d = new Date(date);
-  return new Intl.DateTimeFormat('en-US', options).format(d);
+  return new Intl.DateTimeFormat(DATE_INTL[locale], options).format(d);
 }
 
 /**

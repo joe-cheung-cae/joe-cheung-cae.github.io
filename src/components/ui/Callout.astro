@@ -1,4 +1,6 @@
 ---
+import { ui } from '@/i18n/ui';
+
 interface Props {
   type?: 'note' | 'tip' | 'warning' | 'danger';
   title?: string;
@@ -10,34 +12,44 @@ const calloutConfig = {
   note: {
     class: 'callout-note',
     icon: '💡',
-    defaultTitle: 'Note',
+    titleEn: ui.en.calloutNote,
+    titleZh: ui.zh.calloutNote,
   },
   tip: {
     class: 'callout-tip',
     icon: '✨',
-    defaultTitle: 'Tip',
+    titleEn: ui.en.calloutTip,
+    titleZh: ui.zh.calloutTip,
   },
   warning: {
     class: 'callout-warning',
     icon: '⚠️',
-    defaultTitle: 'Warning',
+    titleEn: ui.en.calloutWarning,
+    titleZh: ui.zh.calloutWarning,
   },
   danger: {
     class: 'callout-danger',
     icon: '🚨',
-    defaultTitle: 'Danger',
+    titleEn: ui.en.calloutDanger,
+    titleZh: ui.zh.calloutDanger,
   },
 };
 
 const config = calloutConfig[type];
-const displayTitle = title || config.defaultTitle;
 ---
 
 <div class={`callout ${config.class}`}>
   <span class="text-xl shrink-0" aria-hidden="true">{config.icon}</span>
   <div class="flex-1 min-w-0">
     <p class="font-semibold text-notion-text dark:text-notion-text-dark mb-1">
-      {displayTitle}
+      {title ? (
+        title
+      ) : (
+        <>
+          <span class="i18n-en">{config.titleEn}</span>
+          <span class="i18n-zh">{config.titleZh}</span>
+        </>
+      )}
     </p>
     <div class="text-notion-text dark:text-notion-text-dark/80">
       <slot />

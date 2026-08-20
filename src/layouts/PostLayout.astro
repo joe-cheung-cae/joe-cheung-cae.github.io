@@ -3,6 +3,7 @@ import NotesLayout from './NotesLayout.astro';
 import TOC from '@/components/navigation/TOC.astro';
 import PrevNext from '@/components/navigation/PrevNext.astro';
 import RelatedPosts from '@/components/RelatedPosts.astro';
+import { formatWords, ui } from '@/i18n/ui';
 import { formatDate } from '@/utils/formatDate';
 import { formatReadingTime } from '@/utils/readingTime';
 import type { CollectionEntry } from 'astro:content';
@@ -18,7 +19,7 @@ interface Props {
 }
 
 const { post, headings, prevPost, nextPost, relatedPosts, readingTime, wordCount } = Astro.props;
-const { title, description, pubDate, updatedDate, tags, language } = post.data;
+const { title, titleZh, description, pubDate, updatedDate, tags, language } = post.data;
 const showTOC = headings.length > 0;
 const baseUrl = import.meta.env.BASE_URL || '/';
 ---
@@ -30,24 +31,38 @@ const baseUrl = import.meta.env.BASE_URL || '/';
   canonicalUrl={post.data.canonicalUrl}
   banner="post"
   headerTitle={title}
+  headerTitleEn={title}
+  headerTitleZh={titleZh}
 >
   <article class="post-article">
     <div class="post-card">
-      <h1 class="post-card-title">{title}</h1>
+      <h1 class="post-card-title">
+        <span class="i18n-en">{title}</span>
+        <span class="i18n-zh">{titleZh}</span>
+      </h1>
 
       <p class="post-card-meta">
-        <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+        <time datetime={pubDate.toISOString()}>
+          <span class="i18n-en">{formatDate(pubDate, 'en')}</span>
+          <span class="i18n-zh">{formatDate(pubDate, 'zh')}</span>
+        </time>
         {updatedDate && (
           <span class="post-updated">
-            <span class="i18n-en">Updated</span>
-            <span class="i18n-zh">更新</span>
-            <time datetime={updatedDate.toISOString()}>{formatDate(updatedDate)}</time>
+            <span class="i18n-en">{ui.en.updated}</span>
+            <span class="i18n-zh">{ui.zh.updated}</span>
+            <time datetime={updatedDate.toISOString()}>
+              <span class="i18n-en">{formatDate(updatedDate, 'en')}</span>
+              <span class="i18n-zh">{formatDate(updatedDate, 'zh')}</span>
+            </time>
           </span>
         )}
-        <span class="reading-time">{formatReadingTime(readingTime)}</span>
+        <span class="reading-time">
+          <span class="i18n-en">{formatReadingTime(readingTime, 'en')}</span>
+          <span class="i18n-zh">{formatReadingTime(readingTime, 'zh')}</span>
+        </span>
         <span class="word-count">
-          <span class="i18n-en">{wordCount.toLocaleString('en-US')} words</span>
-          <span class="i18n-zh">{wordCount.toLocaleString('zh-Hans')} 词</span>
+          <span class="i18n-en">{formatWords('en', wordCount)}</span>
+          <span class="i18n-zh">{formatWords('zh', wordCount)}</span>
         </span>
         {language && <span class="post-language">{language}</span>}
       </p>

@@ -1,6 +1,7 @@
 ---
 import NotesLayout from '@/layouts/NotesLayout.astro';
 import { siteConfig } from '@/site.config';
+import { ui } from '@/i18n/ui';
 ---
 
 <NotesLayout
@@ -85,7 +86,11 @@ import { siteConfig } from '@/site.config';
         欢迎计算力学、高性能计算与 GPU 求解器方向的合作。
       </p>
       <ul>
-        <li>Email: <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a></li>
+        <li>
+          <span class="i18n-en">{ui.en.email}: </span>
+          <span class="i18n-zh">{ui.zh.email}: </span>
+          <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>
+        </li>
         <li>GitHub: <a href={siteConfig.social.github}>{siteConfig.social.github}</a></li>
         <li>X: <a href={siteConfig.social.x}>@JoeCheungZzz</a></li>
       </ul>

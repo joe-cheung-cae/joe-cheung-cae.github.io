@@ -18,7 +18,7 @@ test('search modal keyboard controls work even when input is not focused', async
   await expect(page.locator('body')).toBeVisible();
 
   await page.click('#search-trigger');
-  const searchInput = page.locator('input[placeholder*="Search posts"]');
+  const searchInput = page.locator('[data-search-input]');
   await expect(searchInput).toBeVisible();
 
   await searchInput.fill('cpp');
@@ -46,7 +46,7 @@ test('search modal still supports arrow navigation for IME-style key events', as
   await expect(page.locator('body')).toBeVisible();
 
   await page.click('#search-trigger');
-  const searchInput = page.locator('input[placeholder*="Search posts"]');
+  const searchInput = page.locator('[data-search-input]');
   await expect(searchInput).toBeVisible();
 
   await searchInput.fill('cpp');
@@ -82,7 +82,7 @@ test('search modal supports arrow navigation for c++ query without runtime error
   await expect(page.locator('body')).toBeVisible();
 
   await page.click('#search-trigger');
-  const searchInput = page.locator('input[placeholder*="Search posts"]');
+  const searchInput = page.locator('[data-search-input]');
   await expect(searchInput).toBeVisible();
 
   await searchInput.fill('c++');

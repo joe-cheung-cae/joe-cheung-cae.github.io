@@ -1,10 +1,20 @@
 import { useState, useEffect, useRef, useCallback } from 'preact/hooks';
+import {
+  LANG_CHANGE_EVENT,
+  formatNoResults,
+  formatResults,
+  readDocumentLang,
+  t,
+  type UiLang,
+} from '@/i18n/ui';
 import type { SearchResult } from '@/utils/searchIndex';
 
 interface SearchDocument {
   id: string;
   title: string;
+  titleZh: string;
   description: string;
+  descriptionZh: string;
   slug: string;
   tags: string[];
   language?: string;
@@ -18,52 +28,61 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function localizedTitle(doc: SearchDocument, lang: UiLang): string {
+  return lang === 'zh' ? doc.titleZh : doc.title;
+}
+
+function localizedDescription(doc: SearchDocument, lang: UiLang): string {
+  return lang === 'zh' ? doc.descriptionZh : doc.description;
+}
+
 export default function SearchModal({ searchIndex }: SearchModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [lang, setLang] = useState<UiLang>('en');
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
-  // Simple search function
   const search = useCallback((searchQuery: string): SearchResult[] => {
     if (!searchQuery || searchQuery.trim().length < 2) {
       return [];
     }
 
-    const query = searchQuery.toLowerCase();
+    const needle = searchQuery.toLowerCase();
     const scored = searchIndex
       .map((doc) => {
         let score = 0;
         const matches: string[] = [];
 
-        // Title match (highest weight)
-        if (doc.title.toLowerCase().includes(query)) {
+        if (doc.title.toLowerCase().includes(needle) || doc.titleZh.toLowerCase().includes(needle)) {
           score += 10;
           matches.push('title');
         }
 
-        // Description match
-        if (doc.description.toLowerCase().includes(query)) {
+        if (
+          doc.description.toLowerCase().includes(needle) ||
+          doc.descriptionZh.toLowerCase().includes(needle)
+        ) {
           score += 5;
           matches.push('description');
         }
 
-        // Tags match
-        if (doc.tags.some((tag) => tag.toLowerCase().includes(query))) {
+        if (doc.tags.some((tag) => tag.toLowerCase().includes(needle))) {
           score += 3;
           matches.push('tags');
         }
 
-        // Language match
-        if (doc.language?.toLowerCase().includes(query)) {
+        if (doc.language?.toLowerCase().includes(needle)) {
           score += 2;
           matches.push('language');
         }
 
         return {
           ...doc,
+          title: localizedTitle(doc, lang),
+          description: localizedDescription(doc, lang),
           score,
           match: matches.join(', '),
         };
@@ -73,7 +92,14 @@ export default function SearchModal({ searchIndex }: SearchModalProps) {
       .slice(0, 10);
 
     return scored;
-  }, [searchIndex]);
+  }, [searchIndex, lang]);
+
+  useEffect(() => {
+    const syncLang = () => setLang(readDocumentLang(document.documentElement));
+    syncLang();
+    window.addEventListener(LANG_CHANGE_EVENT, syncLang);
+    return () => window.removeEventListener(LANG_CHANGE_EVENT, syncLang);
+  }, []);
 
   useEffect(() => {
     const handleOpen = () => setIsOpen(true);
@@ -171,7 +197,6 @@ export default function SearchModal({ searchIndex }: SearchModalProps) {
       onClick={(e) => e.target === e.currentTarget && setIsOpen(false)}
     >
       <div className="w-full max-w-2xl mx-4 bg-notion-bg dark:bg-notion-bg-dark rounded-xl shadow-2xl overflow-hidden">
-        {/* Search Input */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-notion-border dark:border-notion-border-dark">
           <svg className="w-5 h-5 text-notion-text dark:text-notion-text-dark/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -179,9 +204,10 @@ export default function SearchModal({ searchIndex }: SearchModalProps) {
           <input
             ref={inputRef}
             type="text"
+            data-search-input
             value={query}
             onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
-            placeholder="Search posts, tags, or languages..."
+            placeholder={t(lang, 'searchPlaceholder')}
             className="flex-1 bg-transparent text-notion-text dark:text-notion-text-dark placeholder:text-notion-text dark:placeholder:text-notion-text-dark/50 focus:outline-none text-lg"
           />
           <kbd className="hidden sm:inline-flex items-center px-2 py-1 text-xs font-mono bg-notion-gray dark:bg-notion-gray-dark rounded">
@@ -189,11 +215,10 @@ export default function SearchModal({ searchIndex }: SearchModalProps) {
           </kbd>
         </div>
 
-        {/* Results */}
         <div ref={resultsRef} className="max-h-[60vh] overflow-y-auto">
           {query.length > 0 && results.length === 0 ? (
             <div className="px-4 py-8 text-center text-notion-text dark:text-notion-text-dark/60">
-              No results found for "{query}"
+              {formatNoResults(lang, query)}
             </div>
           ) : (
             <ul className="py-2">
@@ -240,19 +265,18 @@ export default function SearchModal({ searchIndex }: SearchModalProps) {
           )}
         </div>
 
-        {/* Footer */}
         <div className="flex items-center justify-between px-4 py-2 text-xs text-notion-text dark:text-notion-text-dark/50 border-t border-notion-border dark:border-notion-border-dark bg-notion-gray/50 dark:bg-notion-gray-dark/30">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">
               <kbd className="px-1.5 py-0.5 bg-notion-bg dark:bg-notion-bg-dark rounded">↑↓</kbd>
-              to navigate
+              {t(lang, 'toNavigate')}
             </span>
             <span className="flex items-center gap-1">
               <kbd className="px-1.5 py-0.5 bg-notion-bg dark:bg-notion-bg-dark rounded">↵</kbd>
-              to select
+              {t(lang, 'toSelect')}
             </span>
           </div>
-          <span>{results.length} results</span>
+          <span>{formatResults(lang, results.length)}</span>
         </div>
       </div>
     </div>

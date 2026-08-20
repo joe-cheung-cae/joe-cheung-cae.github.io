@@ -6,7 +6,7 @@ test('homepage cards do not render empty clickable anchors', async ({ page }) =>
   const startHereSection = page.locator('#featured-notes');
   await expect(startHereSection).toBeAttached();
   await expect(
-    startHereSection.getByRole('heading', { name: 'Start Here' })
+    startHereSection.getByRole('heading', { name: /Start Here|从这里开始/ })
   ).toBeAttached();
 
   const cardAnchors = startHereSection.locator('article a');

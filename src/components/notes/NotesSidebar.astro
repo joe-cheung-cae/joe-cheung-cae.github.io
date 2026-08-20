@@ -1,6 +1,7 @@
 ---
 import { siteConfig } from '@/site.config';
 import { isNotesNavActive } from '@/lib/notes-drawer';
+import { ui } from '@/i18n/ui';
 
 interface Props {
   postCount: number;
@@ -12,17 +13,21 @@ const { postCount, tagCount, albumCount } = Astro.props;
 const pathname = Astro.url.pathname;
 
 const navItems = [
-  { href: '/', labelEn: 'Home', labelZh: '主页' },
-  { href: '/blog', labelEn: 'Notes', labelZh: '笔记' },
-  { href: '/tags', labelEn: 'Tags', labelZh: '标签' },
-  { href: '/languages', labelEn: 'Languages', labelZh: '语言' },
-  { href: '/gallery', labelEn: 'Gallery', labelZh: '相册' },
-  { href: '/projects', labelEn: 'Projects', labelZh: '项目' },
-  { href: '/about', labelEn: 'About', labelZh: '关于' },
+  { href: '/', labelEn: ui.en.home, labelZh: ui.zh.home },
+  { href: '/blog', labelEn: ui.en.notes, labelZh: ui.zh.notes },
+  { href: '/tags', labelEn: ui.en.tags, labelZh: ui.zh.tags },
+  { href: '/languages', labelEn: ui.en.languages, labelZh: ui.zh.languages },
+  { href: '/gallery', labelEn: ui.en.gallery, labelZh: ui.zh.gallery },
+  { href: '/projects', labelEn: ui.en.projects, labelZh: ui.zh.projects },
+  { href: '/about', labelEn: ui.en.about, labelZh: ui.zh.about },
 ] as const;
 ---
 
-<aside id="notes-menu" aria-label="Site">
+<aside id="notes-menu" aria-labelledby="notes-menu-label">
+  <span id="notes-menu-label" class="sr-only">
+    <span class="i18n-en">{ui.en.siteNav}</span>
+    <span class="i18n-zh">{ui.zh.siteNav}</span>
+  </span>
   <div class="notes-menu-inner">
     <div class="brand-wrap" id="brand-wrap">
       <a href="/" class="notes-brand">
@@ -32,7 +37,11 @@ const navItems = [
 
       <ul class="social-links">
       <li>
-        <a href={`mailto:${siteConfig.email}`} aria-label="Email">
+        <a href={`mailto:${siteConfig.email}`}>
+          <span class="sr-only">
+            <span class="i18n-en">{ui.en.email}</span>
+            <span class="i18n-zh">{ui.zh.email}</span>
+          </span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16v12H4z"></path>
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 7l8 6 8-6"></path>
@@ -58,23 +67,27 @@ const navItems = [
     <ul class="statistics">
       <li>
         <span class="count">{postCount}</span>
-        <span class="label i18n-en">notes</span>
-        <span class="label i18n-zh">笔记</span>
+        <span class="label i18n-en">{ui.en.notesStat}</span>
+        <span class="label i18n-zh">{ui.zh.notesStat}</span>
       </li>
       <li>
         <span class="count">{tagCount}</span>
-        <span class="label i18n-en">tags</span>
-        <span class="label i18n-zh">标签</span>
+        <span class="label i18n-en">{ui.en.tagsStat}</span>
+        <span class="label i18n-zh">{ui.zh.tagsStat}</span>
       </li>
       <li>
         <span class="count">{albumCount}</span>
-        <span class="label i18n-en">album</span>
-        <span class="label i18n-zh">相册</span>
+        <span class="label i18n-en">{ui.en.albumStat}</span>
+        <span class="label i18n-zh">{ui.zh.albumStat}</span>
       </li>
     </ul>
     </div>
 
-    <nav aria-label="Primary">
+    <nav aria-labelledby="notes-primary-nav-label">
+      <span id="notes-primary-nav-label" class="sr-only">
+        <span class="i18n-en">{ui.en.primaryNav}</span>
+        <span class="i18n-zh">{ui.zh.primaryNav}</span>
+      </span>
       <ul class="nav">
         {navItems.map((item) => (
           <li>

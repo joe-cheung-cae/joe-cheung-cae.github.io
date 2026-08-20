@@ -144,7 +144,7 @@ test.describe('homepage 390px', () => {
 
     const search = page.locator('#search-trigger');
     await expect(search).toBeVisible();
-    await expect(search).toHaveAttribute('aria-label', /search/i);
+    await expect(search).toHaveAccessibleName(/Open search|打开搜索/i);
 
     const lang = page.getByRole('button', { name: /Switch to Chinese|切换到英文/ });
     await expect(lang).toBeVisible();

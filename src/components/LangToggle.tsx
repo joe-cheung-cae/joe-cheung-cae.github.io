@@ -1,31 +1,48 @@
 import { useEffect, useState } from 'preact/hooks';
+import {
+  LANG_CHANGE_EVENT,
+  applyDocumentLang,
+  isUiLang,
+  readDocumentLang,
+  t,
+  type UiLang,
+} from '@/i18n/ui';
 
-type Lang = 'en' | 'zh';
-
-function readLang(): Lang {
+function readStoredLang(): UiLang {
   const saved = localStorage.getItem('lang');
-  if (saved === 'en' || saved === 'zh') return saved;
+  if (isUiLang(saved)) return saved;
   return navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en';
 }
 
-function applyLang(lang: Lang) {
-  document.documentElement.lang = lang === 'zh' ? 'zh-Hans' : 'en';
-  document.documentElement.dataset.lang = lang;
+function applyLang(lang: UiLang) {
+  applyDocumentLang(document.documentElement, lang);
+  window.dispatchEvent(new CustomEvent(LANG_CHANGE_EVENT, { detail: { lang } }));
 }
 
 export default function LangToggle() {
-  const [lang, setLang] = useState<Lang>('en');
+  const [lang, setLang] = useState<UiLang>('en');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const next = readLang();
+    const next = readStoredLang();
     setLang(next);
     applyLang(next);
     setMounted(true);
+
+    const sync = (event: Event) => {
+      const detail = (event as CustomEvent<{ lang?: string }>).detail?.lang;
+      if (isUiLang(detail)) {
+        setLang(detail);
+        return;
+      }
+      setLang(readDocumentLang(document.documentElement));
+    };
+    window.addEventListener(LANG_CHANGE_EVENT, sync);
+    return () => window.removeEventListener(LANG_CHANGE_EVENT, sync);
   }, []);
 
   const toggle = () => {
-    const next: Lang = lang === 'en' ? 'zh' : 'en';
+    const next: UiLang = lang === 'en' ? 'zh' : 'en';
     setLang(next);
     localStorage.setItem('lang', next);
     applyLang(next);
@@ -36,7 +53,7 @@ export default function LangToggle() {
       type="button"
       onClick={toggle}
       className="min-h-11 min-w-11 px-2 rounded-md text-xs font-semibold tracking-wide text-notion-text dark:text-notion-text-dark hover:bg-notion-gray dark:hover:bg-notion-gray-dark transition-colors"
-      aria-label={lang === 'en' ? 'Switch to Chinese' : '切换到英文'}
+      aria-label={lang === 'en' ? t('en', 'switchToChinese') : t('zh', 'switchToEnglish')}
     >
       {mounted ? (lang === 'en' ? '中文' : 'EN') : 'EN'}
     </button>

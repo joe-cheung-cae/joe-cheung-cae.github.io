@@ -2,6 +2,7 @@
 import NotesLayout from '@/layouts/NotesLayout.astro';
 import { siteConfig } from '@/site.config';
 import { projects } from '@/data/projects';
+import { ui } from '@/i18n/ui';
 ---
 
 <NotesLayout
@@ -50,8 +51,8 @@ import { projects } from '@/data/projects';
         rel="noopener noreferrer"
         class="inline-flex items-center min-h-11 px-5 rounded-md border border-notion-border dark:border-notion-border-dark text-sm font-medium text-notion-text dark:text-notion-text-dark hover:border-notion-blue transition-colors"
       >
-        <span class="i18n-en">GitHub profile</span>
-        <span class="i18n-zh">GitHub 主页</span>
+        <span class="i18n-en">{ui.en.githubProfile}</span>
+        <span class="i18n-zh">{ui.zh.githubProfile}</span>
       </a>
     </div>
   </div>

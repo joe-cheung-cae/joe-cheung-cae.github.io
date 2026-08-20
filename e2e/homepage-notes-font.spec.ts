@@ -3,7 +3,8 @@ import { join } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import {
   HOMEPAGE_NOTES_PRIMARY_FAMILY,
-  isComicCodePrimary,
+  HOMEPAGE_NOTES_WOFF2_PATH,
+  isHomepageNotesPrimary,
   primaryFontFamily,
 } from '../src/lib/homepage-notes-font';
 
@@ -37,6 +38,7 @@ async function setLang(page: Page, lang: 'en' | 'zh') {
   await page.locator('html').evaluate((el, next) => {
     el.setAttribute('data-lang', next);
     el.setAttribute('lang', next === 'zh' ? 'zh-Hans' : 'en');
+    el.dispatchEvent(new CustomEvent('lang-change', { detail: { lang: next } }));
   }, lang);
   await expect(page.locator('html')).toHaveAttribute('data-lang', lang);
 }
@@ -57,6 +59,8 @@ async function notesComputedStacks(page: Page, lang: 'en' | 'zh') {
     const headingStack = await heading.evaluate((el) => getComputedStyle(el).fontFamily);
     const copyStack = await copy.evaluate((el) => getComputedStyle(el).fontFamily);
     const bodyStack = await body.evaluate((el) => getComputedStyle(el).fontFamily);
+    const headingFeatures = await heading.evaluate((el) => getComputedStyle(el).fontFeatureSettings);
+    expect(headingFeatures, `${region} ligatures`).toMatch(/calt/);
     stacks.push(
       { region, role: 'heading', stack: headingStack },
       { region, role: `${lang}-copy`, stack: copyStack },
@@ -67,10 +71,7 @@ async function notesComputedStacks(page: Page, lang: 'en' | 'zh') {
   return stacks;
 }
 
-async function writeEvidence(
-  page: Page,
-  dump: Record<string, unknown>
-): Promise<void> {
+async function writeEvidence(page: Page, dump: Record<string, unknown>): Promise<void> {
   const evidenceDir = process.env.NOTES_FONT_EVIDENCE_DIR;
   if (!evidenceDir) return;
 
@@ -78,14 +79,27 @@ async function writeEvidence(
   await page.locator('#featured-notes').screenshot({
     path: join(evidenceDir, 'homepage-notes-font.png'),
   });
-  writeFileSync(join(evidenceDir, 'notes-font-computed.txt'), JSON.stringify(dump, null, 2));
+  writeFileSync(join(evidenceDir, 'notes-font-computed.json'), JSON.stringify(dump, null, 2));
+}
+
+async function assertMapleMonoLoaded(page: Page) {
+  const fontOk = await page.evaluate(async (family) => {
+    await document.fonts.ready;
+    return document.fonts.check(`16px "${family}"`);
+  }, HOMEPAGE_NOTES_PRIMARY_FAMILY);
+  expect(fontOk).toBe(true);
+
+  const fontResponse = await page.request.get(HOMEPAGE_NOTES_WOFF2_PATH);
+  expect(fontResponse.status()).toBe(200);
+  expect(fontResponse.headers()['content-type'] ?? '').toMatch(/font|woff2|octet-stream/i);
 }
 
 for (const run of [1, 2] as const) {
-  test(`homepage notes use Comic Code first for en and zh (run ${run})`, async ({
+  test(`homepage notes use Maple Mono NF CN first for en and zh (run ${run})`, async ({
     page,
   }) => {
     const errors = await gotoHomeAndEnter(page);
+    await assertMapleMonoLoaded(page);
     const dump: Record<string, unknown> = { run, errors, langs: {} };
 
     for (const lang of ['en', 'zh'] as const) {
@@ -97,7 +111,7 @@ for (const run of [1, 2] as const) {
 
       for (const { region, role, stack } of stacks) {
         expect(
-          isComicCodePrimary(stack),
+          isHomepageNotesPrimary(stack),
           `${region} ${role} computed font-family: ${stack}`
         ).toBe(true);
         expect(
@@ -105,6 +119,7 @@ for (const run of [1, 2] as const) {
           `${region} ${role} primary family: ${stack}`
         ).toBe(HOMEPAGE_NOTES_PRIMARY_FAMILY);
         expect(primaryFontFamily(stack).toLowerCase().includes('ibm plex')).toBe(false);
+        expect(primaryFontFamily(stack)).not.toBe('Comic Code');
       }
     }
 
@@ -115,3 +130,25 @@ for (const run of [1, 2] as const) {
     }
   });
 }
+
+test('blocked Maple Mono NF CN request does not overflow homepage notes', async ({ page }) => {
+  await page.route(`**${HOMEPAGE_NOTES_WOFF2_PATH}`, (route) => route.abort());
+  await gotoHomeAndEnter(page);
+
+  const viewport = page.viewportSize();
+  expect(viewport).toBeTruthy();
+
+  for (const region of NOTE_REGIONS) {
+    const box = await page.locator(region).boundingBox();
+    expect(box, region).toBeTruthy();
+    expect(box!.width).toBeGreaterThan(80);
+    expect(box!.height).toBeGreaterThan(40);
+    expect(box!.width).toBeLessThanOrEqual((viewport?.width ?? 0) + 2);
+  }
+
+  const overflow = await page.evaluate(() => ({
+    scrollWidth: document.documentElement.scrollWidth,
+    innerWidth: window.innerWidth,
+  }));
+  expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.innerWidth + 2);
+});

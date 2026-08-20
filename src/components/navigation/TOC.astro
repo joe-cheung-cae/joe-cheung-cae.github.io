@@ -1,4 +1,6 @@
 ---
+import { ui } from '@/i18n/ui';
+
 interface Props {
   headings: Array<{ depth: number; slug: string; text: string }>;
 }
@@ -9,10 +11,10 @@ const tocItems = headings.filter((h) => h.depth === 2 || h.depth === 3);
 ---
 
 {tocItems.length > 0 && (
-  <nav id="post-toc" aria-label="Table of contents">
-    <p class="post-toc-title">
-      <span class="i18n-en">On this page</span>
-      <span class="i18n-zh">本页目录</span>
+  <nav id="post-toc" aria-labelledby="post-toc-title">
+    <p class="post-toc-title" id="post-toc-title">
+      <span class="i18n-en">{ui.en.onThisPage}</span>
+      <span class="i18n-zh">{ui.zh.onThisPage}</span>
     </p>
     <ul>
       {tocItems.map((heading) => (

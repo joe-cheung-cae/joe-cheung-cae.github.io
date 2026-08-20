@@ -1,6 +1,7 @@
 ---
 import NotesLayout from '@/layouts/NotesLayout.astro';
 import { getCollection } from 'astro:content';
+import { formatPostsCount } from '@/i18n/ui';
 
 const allPosts = await getCollection('posts', ({ data }) => {
   return import.meta.env.PROD ? !data.draft : true;
@@ -75,7 +76,8 @@ const letters = Object.keys(groupedTags).sort();
                   #{tag}
                 </span>
                 <span class="text-sm text-notion-text dark:text-notion-text-dark/50">
-                  {count} {count === 1 ? 'post' : 'posts'}
+                  <span class="i18n-en">{formatPostsCount('en', count)}</span>
+                  <span class="i18n-zh">{formatPostsCount('zh', count)}</span>
                 </span>
               </a>
             ))}

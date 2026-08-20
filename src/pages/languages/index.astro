@@ -1,6 +1,7 @@
 ---
 import NotesLayout from '@/layouts/NotesLayout.astro';
 import { getCollection } from 'astro:content';
+import { formatNotesCount, ui } from '@/i18n/ui';
 
 const allPosts = await getCollection('posts', ({ data }) => {
   return import.meta.env.PROD ? !data.draft : true;
@@ -45,7 +46,8 @@ const sortedLanguages = Object.entries(languageCounts).sort((a, b) => b[1] - a[1
                   {language}
                 </h2>
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-notion-blue-light dark:bg-blue-900/30 text-notion-blue">
-                  {count} {count === 1 ? 'note' : 'notes'}
+                  <span class="i18n-en">{formatNotesCount('en', count)}</span>
+                  <span class="i18n-zh">{formatNotesCount('zh', count)}</span>
                 </span>
               </div>
 
@@ -60,7 +62,8 @@ const sortedLanguages = Object.entries(languageCounts).sort((a, b) => b[1] - a[1
               )}
 
               <div class="mt-4 flex items-center text-sm text-notion-blue font-medium">
-                View all
+                <span class="i18n-en">{ui.en.viewAll}</span>
+                <span class="i18n-zh">{ui.zh.viewAll}</span>
                 <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
@@ -72,7 +75,8 @@ const sortedLanguages = Object.entries(languageCounts).sort((a, b) => b[1] - a[1
     ) : (
       <div class="text-center py-16">
         <p class="text-notion-text dark:text-notion-text-dark/60">
-          No languages found.
+          <span class="i18n-en">{ui.en.noLanguages}</span>
+          <span class="i18n-zh">{ui.zh.noLanguages}</span>
         </p>
       </div>
     )}

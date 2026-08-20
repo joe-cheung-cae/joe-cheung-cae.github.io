@@ -16,6 +16,8 @@ interface Props {
   canonicalUrl?: string;
   noIndex?: boolean;
   headerTitle?: string;
+  headerTitleEn?: string;
+  headerTitleZh?: string;
   banner?: 'index' | 'post' | 'tags' | 'quiet';
   bannerTitleEn?: string;
   bannerTitleZh?: string;
@@ -30,6 +32,8 @@ const {
   canonicalUrl,
   noIndex,
   headerTitle,
+  headerTitleEn,
+  headerTitleZh,
   banner = 'index',
   bannerTitleEn,
   bannerTitleZh,
@@ -48,7 +52,9 @@ const albumCount = albums.length;
 const searchIndex = allPosts.map((post) => ({
   id: post.slug,
   title: post.data.title,
+  titleZh: post.data.titleZh,
   description: post.data.description,
+  descriptionZh: post.data.descriptionZh,
   content: post.body?.slice(0, 2000) || '',
   slug: post.slug,
   tags: post.data.tags,
@@ -66,7 +72,7 @@ const searchIndex = allPosts.map((post) => ({
   <NotesSidebar postCount={postCount} tagCount={tagCount} albumCount={albumCount} />
   <div class="notes-menu-backdrop" id="notes-menu-backdrop"></div>
   <div class="notes-wrap" id="main">
-    <NotesTopHeader headerTitle={headerTitle} />
+    <NotesTopHeader headerTitle={headerTitle} headerTitleEn={headerTitleEn} headerTitleZh={headerTitleZh} />
     <NotesContentHeader
       banner={banner}
       bannerTitleEn={bannerTitleEn}

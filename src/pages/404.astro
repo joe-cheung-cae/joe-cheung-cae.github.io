@@ -1,5 +1,6 @@
 ---
 import NotesLayout from '@/layouts/NotesLayout.astro';
+import { ui } from '@/i18n/ui';
 
 const baseUrl = import.meta.env.BASE_URL || '/';
 ---
@@ -14,10 +15,12 @@ const baseUrl = import.meta.env.BASE_URL || '/';
     <div class="text-center max-w-2xl mx-auto">
       <h1 class="text-6xl sm:text-8xl font-bold text-notion-blue mb-4">404</h1>
       <h2 class="text-2xl sm:text-3xl font-semibold text-notion-text dark:text-notion-text-dark mb-4">
-        Page Not Found
+        <span class="i18n-en">{ui.en.pageNotFound}</span>
+        <span class="i18n-zh">{ui.zh.pageNotFound}</span>
       </h2>
       <p class="text-lg text-notion-text dark:text-notion-text-dark/70 mb-8">
-        The page you're looking for doesn't exist or has been moved.
+        <span class="i18n-en">{ui.en.pageNotFoundBody}</span>
+        <span class="i18n-zh">{ui.zh.pageNotFoundBody}</span>
       </p>
 
       <div class="flex flex-wrap justify-center gap-4">
@@ -28,28 +31,32 @@ const baseUrl = import.meta.env.BASE_URL || '/';
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
           </svg>
-          <span class="i18n-en">Go Home</span>
-          <span class="i18n-zh">回到主页</span>
+          <span class="i18n-en">{ui.en.goHome}</span>
+          <span class="i18n-zh">{ui.zh.goHome}</span>
         </a>
         <a
           href={`${baseUrl}blog`}
           class="inline-flex items-center px-6 py-3 rounded-lg border border-notion-border dark:border-notion-border-dark text-notion-text dark:text-notion-text-dark font-medium hover:bg-notion-gray dark:hover:bg-notion-gray-dark transition-colors"
         >
-          <span class="i18n-en">Browse Notes</span>
-          <span class="i18n-zh">浏览笔记</span>
+          <span class="i18n-en">{ui.en.browseNotes}</span>
+          <span class="i18n-zh">{ui.zh.browseNotes}</span>
         </a>
       </div>
 
       {/* Suggested Links */}
       <div class="mt-16 pt-8 border-t border-notion-border dark:border-notion-border-dark">
         <h3 class="text-sm font-semibold text-notion-text dark:text-notion-text-dark/60 uppercase tracking-wider mb-4">
-          Popular Destinations
+          <span class="i18n-en">{ui.en.popularDestinations}</span>
+          <span class="i18n-zh">{ui.zh.popularDestinations}</span>
         </h3>
         <div class="flex flex-wrap justify-center gap-4">
           <a href={`${baseUrl}tags/cpp`} class="text-notion-blue hover:underline">#cpp</a>
           <a href={`${baseUrl}tags/algorithms`} class="text-notion-blue hover:underline">#algorithms</a>
           <a href={`${baseUrl}languages/c++`} class="text-notion-blue hover:underline">C++</a>
-          <a href={`${baseUrl}about`} class="text-notion-blue hover:underline">About</a>
+          <a href={`${baseUrl}about`} class="text-notion-blue hover:underline">
+            <span class="i18n-en">{ui.en.about}</span>
+            <span class="i18n-zh">{ui.zh.about}</span>
+          </a>
         </div>
       </div>
     </div>
