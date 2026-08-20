@@ -26,7 +26,24 @@ Upstream works used in the shipped source:
    Release: v7.9 MapleMono-NF-CN.zip
    License: SIL Open Font License 1.1 (OFL-1.1)
    Copyright 2022 The Maple Mono Project Authors
-   Use:     Homepage notes surfaces (#featured-notes, #latest-notes).
-            Self-hosted WOFF2 at public/fonts/MapleMono-NF-CN-Regular.woff2
-            encoded from the official MapleMono-NF-CN-Regular.ttf. OFL
-            text is at public/fonts/OFL.txt.
+   Use:     Homepage notes (#featured-notes, #latest-notes) and post
+            code snippets (pre / .astro-code). Self-hosted WOFF2 at
+            public/fonts/MapleMono-NF-CN-Regular.woff2 encoded from the
+            official MapleMono-NF-CN-Regular.ttf. OFL text is at
+            public/fonts/OFL.txt.
+
+   Ligatures currently ON: calt, liga, clig, dlig, ss03, ss07.
+   That is Maple Mono's main ASCII operator set (== != => -> && ::
+   ++ // >> and [TODO]-style tags).
+
+   Known gaps (not a full ligature enable):
+   - Only Regular is shipped. Letter joins such as ff / tt / al / il
+     exist on Italic only, so they do not appear in upright code.
+   - ss01 ss02 ss04 are official "broken" ligature styles; leaving
+     them on makes == != <= >= __ look unligatured.
+   - ss06 breaks italic letter joins.
+   - ss08 ss09 ss10 ss11 add extra ligatures (>>= |= /= ~=) but their
+     GSUB lookups intercept equal/exclam and, in Chromium, disable
+     == and !=. They stay off for that reason.
+   - HTML <title>, Open Graph, Twitter, and RSS stay English.
+   - Transfer size of the NF CN Regular WOFF2 is 6,296,000 bytes.
