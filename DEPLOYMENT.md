@@ -1,6 +1,9 @@
 # Deployment Guide
 
-This guide covers all available deployment options for the Tech Notes blog.
+This guide covers deployment options for the Joe Cheung personal site
+(https://joe-cheung-cae.github.io/). GitHub Pages currently serves the
+`gh-pages` branch produced by `npm run deploy:github`. There is no
+GitHub Actions workflow for Pages in this repository.
 
 ## Table of Contents
 
@@ -13,12 +16,12 @@ This guide covers all available deployment options for the Tech Notes blog.
 
 ## Overview
 
-This blog supports three deployment backends:
+This site supports three deployment backends:
 
 | Backend | Use Case | Default URL |
 |---------|----------|-------------|
 | **Local** | Development and testing | `http://localhost:4321` |
-| **GitHub Pages** | Free static hosting | `https://<username>.github.io` |
+| **GitHub Pages** | Free static hosting | `https://joe-cheung-cae.github.io/` |
 | **Docker** | Self-hosted/containerized | `http://localhost:8080` |
 
 Each backend uses environment-specific configuration to ensure correct URLs, paths, and asset loading.
@@ -80,23 +83,15 @@ GitHub Pages deployment uses the "deploy from a branch" method. The `dist/` fold
 
 ### Configuration
 
-Edit `.env.github` based on your repository type:
+This repository is a GitHub **user site** (`joe-cheung-cae.github.io`). Use root `DEPLOY_BASE=/` — not a leftover project-site path such as `/joe-blog`.
 
-**User Site** (`username.github.io` repository):
+`.env.github`:
+
 ```bash
 # .env.github
-DEPLOY_SITE=https://<your-username>.github.io
+DEPLOY_SITE=https://joe-cheung-cae.github.io
 DEPLOY_BASE=/
 ```
-
-**Project Site** (any other repository):
-```bash
-# .env.github
-DEPLOY_SITE=https://<your-username>.github.io
-DEPLOY_BASE=/<your-repo-name>
-```
-
-**Note**: Since this project uses `joe-cheung-cae.github.io` (user site), `DEPLOY_BASE` is set to `/`.
 
 ### How It Works
 
@@ -201,7 +196,7 @@ docker run -p 3000:80 joe-blog
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `DEPLOY_SITE` | Full site URL without trailing slash | `https://example.com` |
-| `DEPLOY_BASE` | Base path (use `/` for root) | `/blog` |
+| `DEPLOY_BASE` | Base path (use `/` for this user site) | `/` |
 
 ### Per-Environment Files
 
@@ -228,7 +223,8 @@ Ensure `.env` file exists (build scripts copy the appropriate environment file).
 
 **Links not working after deployment**
 - Check that `DEPLOY_BASE` matches your deployment path
-- For GitHub Pages, must include repository name (e.g., `/joe-blog`)
+- This repository is a user site (`joe-cheung-cae.github.io`): use `DEPLOY_BASE=/`
+- Do not use a leftover project-site path such as `/joe-blog`
 - For local/Docker, use `/` for root path
 
 **OG images not showing**
@@ -259,9 +255,8 @@ docker-compose up --build
 ### GitHub Pages Issues
 
 **404 errors after deployment**
-- For **user sites** (`username.github.io` repo): Use `DEPLOY_BASE=/`
-- For **project sites**: Use `DEPLOY_BASE=/<repo-name>`
-- Check that GitHub Pages source is set to "Deploy from a branch"
+- This is a **user site** (`joe-cheung-cae.github.io`): use `DEPLOY_BASE=/`. Do not use `/joe-blog` or another project-site path
+- Check that GitHub Pages source is set to "Deploy from a branch" (`gh-pages`, folder `/ (root)`)
 - Verify `gh-pages` branch exists and has content
 - Wait 1-2 minutes for GitHub Pages to propagate changes
 
@@ -308,7 +303,7 @@ For production Docker deployments, use a reverse proxy (nginx-proxy, Traefik) or
 
 ### Switching from Docker to GitHub Pages
 
-1. Ensure `.env.github` has correct values
-2. Enable GitHub Actions in repository settings
-3. Push to main branch
+1. Ensure `.env.github` has correct values (`DEPLOY_SITE=https://joe-cheung-cae.github.io`, `DEPLOY_BASE=/`)
+2. In repository **Settings → Pages**, set **Deploy from a branch**, branch `gh-pages`, folder `/ (root)`
+3. Run `npm run deploy:github` (this is not a GitHub Actions Pages workflow)
 4. Update DNS or redirect as needed

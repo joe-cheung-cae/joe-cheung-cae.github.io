@@ -1,0 +1,22 @@
+Third-party list for the Joe Cheung personal site
+https://joe-cheung-cae.github.io/
+
+This repository is licensed LGPL-3.0-only (see LICENSE). GNU GPL v3
+is in COPYING because LGPL-3.0 incorporates GPL-3.0 and requires that
+text to accompany this license.
+
+Upstream works used in the shipped source:
+
+1. SimonAKing/HomePage
+   URL:     https://github.com/SimonAKing/HomePage
+   License: LGPL-3.0
+   Use:     Homepage mechanics derived from this project. The vendored
+            fluid script arrived via Simon src/js/background.js.
+
+2. Pavel Dobryakov WebGL-Fluid-Simulation
+   URL:     https://github.com/PavelDoGreat/WebGL-Fluid-Simulation
+   License: MIT
+   Copyright (c) 2017 Pavel Dobryakov
+   Use:     Vendored path src/scripts/webgl-fluid.js via Simon
+            src/js/background.js. The MIT header in that file must
+            remain intact.

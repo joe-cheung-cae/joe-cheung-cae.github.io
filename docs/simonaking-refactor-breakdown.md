@@ -1,3 +1,5 @@
+> **Historical.** Completed process notes from the homepage refactor — not current tasking. The live site is Joe Cheung’s personal homepage (Astro, Tailwind, MDX, Preact, MiniSearch) at https://joe-cheung-cae.github.io/, deployed from the `gh-pages` branch. See README.md and LICENSE.
+
 # SimonAKing/HomePage → Joe Cheung site: 需求拆解
 
 Status: **done** (this phase is mapping only; no homepage UI).  

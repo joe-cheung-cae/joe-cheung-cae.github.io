@@ -1,3 +1,5 @@
+> **Historical.** Original Notion-like blog prompt — not current tasking. The live site is Joe Cheung’s personal homepage (Astro, Tailwind, MDX, Preact, MiniSearch) at https://joe-cheung-cae.github.io/, deployed from the `gh-pages` branch. See README.md and LICENSE.
+
 You are a senior front-end engineer + technical writer. Build a production-ready “Notion-like” technical learning blog using Astro.
 
 HIGH-LEVEL VISION
