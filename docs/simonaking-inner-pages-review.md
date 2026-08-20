@@ -1,3 +1,5 @@
+> **Historical.** Completed process notes from the inner-pages alignment — not current tasking. The live site is Joe Cheung’s personal homepage (Astro, Tailwind, MDX, Preact, MiniSearch) at https://joe-cheung-cae.github.io/, deployed from the `gh-pages` branch. See README.md and LICENSE.
+
 # SimonAKing inner pages — 评审
 
 Status: **done** (read-only review of current `src/` + e2e; **no UI**).  

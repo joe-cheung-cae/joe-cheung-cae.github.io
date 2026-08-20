@@ -1,3 +1,5 @@
+> **Historical.** Superseded particle-upgrade plan — not current tasking. The live site is Joe Cheung’s personal homepage (Astro, Tailwind, MDX, Preact, MiniSearch) at https://joe-cheung-cae.github.io/, deployed from the `gh-pages` branch. See README.md and LICENSE.
+
 # Joe Cheung 个人网站美化升级完整开发计划
 （Grok Build · 含动画与粒子特效）
 

@@ -2,10 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+Entries 1.0.0 and 1.1.0 are historical site releases. `package.json` version
+is `0.0.1` and is not bumped by those markers.
 
 ## [Unreleased]
+
+### Added
+- Repository license **LGPL-3.0-only** (`LICENSE`, `COPYING`) and third-party
+  provenance (`NOTICE`) for SimonAKing/HomePage (**LGPL-3.0**) and Pavel
+  Dobryakov WebGL-Fluid-Simulation (**MIT**).
+
+### Changed
+- Root and `docs/` markdown aligned with the live Joe Cheung personal site
+  (Astro / Tailwind / MDX / Preact / MiniSearch, `gh-pages` deploy at
+  https://joe-cheung-cae.github.io/). Stale Notion-like / particle-upgrade
+  plans are marked historical.
 
 ## [1.1.0] - 2024-02-07
 
@@ -56,5 +68,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automatic draft filtering for production builds
 - OpenGraph meta tags for social sharing
 
-[Unreleased]: https://github.com/chaoboli/notion-like-tech-notes/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/chaoboli/notion-like-tech-notes/releases/tag/v1.0.0
+[Unreleased]: https://github.com/joe-cheung-cae/joe-cheung-cae.github.io/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/joe-cheung-cae/joe-cheung-cae.github.io/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/joe-cheung-cae/joe-cheung-cae.github.io/releases/tag/v1.0.0
