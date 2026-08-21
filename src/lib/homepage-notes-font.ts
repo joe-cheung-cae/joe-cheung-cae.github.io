@@ -9,10 +9,16 @@ export const HOMEPAGE_NOTES_WOFF2_PATH = `/fonts/${HOMEPAGE_NOTES_WOFF2_FILE}`;
 export const HOMEPAGE_NOTES_FONT_STACK =
   "'Maple Mono NF CN', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace";
 
-export const HOMEPAGE_NOTES_LIGATURE_FEATURES =
-  '"calt" 1, "liga" 1, "clig" 1, "dlig" 1, "ss03" 1, "ss07" 1, "kern" 1';
+export const HOMEPAGE_NOTES_LIGATURE_FEATURES = '"calt" 1, "liga" 1, "kern" 1';
 
-export const MAPLE_MONO_DISABLED_LIGATURE_SETS = ['ss01', 'ss02', 'ss04', 'ss06', 'ss08', 'ss09', 'ss10', 'ss11'] as const;
+export const MAPLE_MONO_FROZEN_LIGATURE_SETS = ['ss03', 'ss07', 'ss08', 'ss09', 'ss10', 'ss11'] as const;
+
+export const MAPLE_MONO_DISABLED_LIGATURE_SETS = ['ss01', 'ss02', 'ss04', 'ss06'] as const;
+
+export const MAPLE_MONO_CSS_OFF_LIGATURE_SETS = [
+  ...MAPLE_MONO_DISABLED_LIGATURE_SETS,
+  ...MAPLE_MONO_FROZEN_LIGATURE_SETS,
+] as const;
 
 export const HOMEPAGE_NOTES_FONT_RELEASE = {
   source: 'https://github.com/subframe7536/maple-font',

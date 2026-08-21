@@ -19,7 +19,9 @@ import {
   homepageNotesInlineStyle,
   homepageNotesLigatureFeatureSettings,
   isHomepageNotesPrimary,
+  MAPLE_MONO_CSS_OFF_LIGATURE_SETS,
   MAPLE_MONO_DISABLED_LIGATURE_SETS,
+  MAPLE_MONO_FROZEN_LIGATURE_SETS,
   mapleMonoCodeSnippetCss,
   mapleMonoNfCnFontFaceIsDeclared,
   primaryFontFamily,
@@ -68,22 +70,27 @@ describe('homepage notes font stack', () => {
 
   test('homepage notes re-enable Maple Mono calt ligatures over body feature-settings', () => {
     const settings = homepageNotesLigatureFeatureSettings();
-    for (const tag of ['calt', 'liga', 'clig', 'dlig', 'ss03', 'ss07']) {
+    for (const tag of ['calt', 'liga', 'kern']) {
       assert.match(settings, new RegExp(`["']${tag}["']\\s*1`), `${tag} must be on`);
     }
     assert.equal(/["']calt["']\s*0/.test(settings), false);
-    for (const tag of MAPLE_MONO_DISABLED_LIGATURE_SETS) {
+    for (const tag of MAPLE_MONO_CSS_OFF_LIGATURE_SETS) {
       assert.equal(
         new RegExp(`["']${tag}["']\\s*1`).test(settings),
         false,
-        `${tag} breaks or intercepts default English ligatures`
+        `${tag} must stay out of CSS; extra sets are frozen into calt`
       );
     }
+    assert.deepEqual([...MAPLE_MONO_FROZEN_LIGATURE_SETS], ['ss03', 'ss07', 'ss08', 'ss09', 'ss10', 'ss11']);
+    assert.deepEqual([...MAPLE_MONO_DISABLED_LIGATURE_SETS], ['ss01', 'ss02', 'ss04', 'ss06']);
     assert.equal(cssEnablesMapleMonoLigatures(homepageCss), true);
     assert.equal(cssEnablesMapleMonoLigatures(homepageNotesFontFaceCss()), false);
     assert.equal(/["']ss01["']\s*1/.test(homepageCss), false);
-    assert.match(homepageCss, /["']ss07["']\s*1/);
+    assert.equal(/["']ss07["']\s*1/.test(homepageCss), false);
     assert.equal(/["']ss11["']\s*1/.test(homepageCss), false);
+
+    const globalCss = readFileSync(join(here, '../styles/global.css'), 'utf8');
+    assert.match(globalCss, /font-feature-settings:\s*"ss01" 1, "calt" 1/);
   });
 
   test('index.astro wires featured and latest notes to the shipped Maple Mono NF CN style', () => {
@@ -112,7 +119,7 @@ describe('homepage notes font stack', () => {
     assert.match(snippetCss, /\.astro-code/);
     assert.match(snippetCss, /font-feature-settings/);
     assert.match(snippetCss, /["']calt["']\s*1/);
-    assert.match(snippetCss, /["']ss07["']\s*1/);
+    assert.equal(/["']ss07["']\s*1/.test(snippetCss), false);
     assert.equal(/["']ss11["']\s*1/.test(snippetCss), false);
     assert.equal(
       /["']ss01["']\s*1/.test(snippetCss),

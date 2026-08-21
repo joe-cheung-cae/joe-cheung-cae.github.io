@@ -66,6 +66,8 @@ describe('license and documentation provenance', () => {
     assert.match(notice, /subframe7536\/maple-font/);
     assert.match(notice, /OFL-1\.1|SIL Open Font License 1\.1/);
     assert.match(notice, /MapleMono-NF-CN\.zip/);
+    assert.match(notice, /frozen into calt/);
+    assert.match(notice, /ss08 ss09 ss10 ss11/);
   });
 
   test('vendored fluid script keeps the Pavel MIT copyright header', () => {

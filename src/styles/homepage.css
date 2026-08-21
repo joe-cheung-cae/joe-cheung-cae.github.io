@@ -21,7 +21,7 @@
 #latest-notes .i18n-zh {
   font-family: var(--homepage-notes-font-family, 'Maple Mono NF CN', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace);
   font-variant-ligatures: common-ligatures discretionary-ligatures contextual;
-  font-feature-settings: "calt" 1, "liga" 1, "clig" 1, "dlig" 1, "ss03" 1, "ss07" 1, "kern" 1;
+  font-feature-settings: "calt" 1, "liga" 1, "kern" 1;
   overflow-wrap: anywhere;
   word-break: break-word;
   min-width: 0;

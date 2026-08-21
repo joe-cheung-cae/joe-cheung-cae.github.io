@@ -31,7 +31,7 @@
 
   body {
     @apply bg-notion-bg dark:bg-notion-bg-dark text-notion-text dark:text-notion-text-dark antialiased;
-    font-feature-settings: "ss01" 1, "kern" 1;
+    font-feature-settings: "ss01" 1, "calt" 1, "liga" 1, "kern" 1;
   }
 
   button:not(:disabled),
